@@ -4,7 +4,7 @@ module Geometry.VertexEnum.Internal
 import           Data.IntMap.Strict                    ( IntMap, mergeWithKey )
 import qualified Data.IntMap.Strict                    as IM
 import           Data.List                             ( nub, union )
-import           Data.Ratio                            ( numerator, denominator )
+import           Data.Ratio                            ( (%), numerator, denominator )
 import           Geometry.VertexEnum.Constraint        ( Constraint (..), Sense (..) )
 import           Geometry.VertexEnum.LinearCombination ( LinearCombination (..), VarIndex )
 
@@ -31,7 +31,9 @@ normalizeConstraint vars (Constraint lhs sense rhs) =
     coefs = IM.elems $ mergeWithKey (\_ a b -> Just (a-b)) id id lhs' rhs'
     denominators = map denominator coefs
     ppcm = foldr lcm 1 denominators % 1
-    x:xs = map (realToFrac . numerator . (*ppcm)) coefs
+    (x, xs) = case map (realToFrac . numerator . (*ppcm)) coefs of
+      (xx:xxs)  -> (xx, xxs)
+      [] -> (0, [])
   -- let (x:xs) = map realToFrac $
   --              IM.elems $ mergeWithKey (\_ a b -> Just (a-b)) id id lhs' rhs'
   -- in

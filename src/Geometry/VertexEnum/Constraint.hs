@@ -1,12 +1,14 @@
+{-# LANGUAGE InstanceSigs #-}
 module Geometry.VertexEnum.Constraint
+  (Sense (..), Constraint (..), (.>=.), (.<=.), (.>=), (.<=))
   where
-import           Data.Ratio                            ( Rational )
 import           Geometry.VertexEnum.LinearCombination ( LinearCombination, constant )
 
 data Sense = Gt | Lt
   deriving Eq
 
 instance Show Sense where
+  show :: Sense -> String
   show Gt = ">="
   show Lt = "<="
 
