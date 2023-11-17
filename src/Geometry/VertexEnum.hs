@@ -10,6 +10,14 @@ See README for an example.
 module Geometry.VertexEnum
   ( module X )
   where
-import           Geometry.VertexEnum.Constraint        as X
-import           Geometry.VertexEnum.LinearCombination as X
-import           Geometry.VertexEnum.VertexEnum          as X
+import Geometry.VertexEnum.Constraint        as X ( Constraint(..)
+                                                  , Sense(..)
+                                                  , (.>=.), (.<=.), (.>=), (.<=) 
+                                                  )
+import Geometry.VertexEnum.LinearCombination as X ( VarIndex
+                                                  , LinearCombination(..)
+                                                  , newVar
+                                                  , linearCombination
+                                                  , constant
+                                                  , cst )
+import Geometry.VertexEnum.VertexEnum        as X ( vertexenum )

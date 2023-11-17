@@ -49,6 +49,7 @@ hsintersections' halfspaces ipoint stdout = do
       free nintersectionsPtr
       return result
 
+-- | Vertex enumeration
 vertexenum :: [Constraint]   -- ^ list of inequalities
            -> Maybe [Double] -- ^ point in the interior of the polytope
            -> IO [[Double]]

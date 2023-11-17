@@ -38,14 +38,18 @@ instance Show LinearCombination where
                         q = denominator r
 
 instance AdditiveGroup LinearCombination where
+  zeroV :: LinearCombination
   zeroV = LinearCombination (IM.singleton 0 0)
+  (^+^) :: LinearCombination -> LinearCombination -> LinearCombination
   (^+^) (LinearCombination imap1) (LinearCombination imap2) =
     LinearCombination
     (mergeWithKey (\_ x y -> Just (x+y)) id id imap1 imap2)
+  negateV :: LinearCombination -> LinearCombination
   negateV (LinearCombination imap) = LinearCombination (IM.map negate imap)
 
 instance VectorSpace LinearCombination where
   type Scalar LinearCombination = Rational
+  (*^) :: Scalar LinearCombination -> LinearCombination -> LinearCombination
   (*^) lambda (LinearCombination imap) =
     LinearCombination (IM.map (*lambda) imap)
 

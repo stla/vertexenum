@@ -57,7 +57,6 @@ normalizeConstraints constraints =
   where
     vars = nub $ concatMap varsOfConstraint constraints
 
-
 inequality :: [Double] -> Bound [Double]
 inequality row = (coeffs ++ [1.0]) :<=: bound
   where

@@ -1,8 +1,13 @@
 {-# LANGUAGE InstanceSigs #-}
 module Geometry.VertexEnum.Constraint
-  (Sense (..), Constraint (..), (.>=.), (.<=.), (.>=), (.<=))
+  (  Sense (..)
+  , Constraint (..)
+  , (.>=.)
+  , (.<=.)
+  , (.>=)
+  , (.<=) )
   where
-import           Geometry.VertexEnum.LinearCombination ( LinearCombination, constant )
+import Geometry.VertexEnum.LinearCombination ( LinearCombination, constant )
 
 data Sense = Gt | Lt
   deriving Eq
