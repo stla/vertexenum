@@ -69,7 +69,7 @@ checkConstraints :: [Constraint] -- ^ list of inequalities
                  -> [Double]     -- ^ point to be tested
                  -> [Double]     -- ^ differences
 checkConstraints constraints point = 
-  if nvars == length point 
+  if nvars == length point + 1
     then 
       map (checkRow point) halfspacesMatrix
     else 
@@ -77,7 +77,7 @@ checkConstraints constraints point =
   where
     halfspacesMatrix = normalizeConstraints constraints
     nvars = length (head halfspacesMatrix)
-    checkRow pt row = - sum (zipWith (*) row pt)
+    checkRow pt row = - sum (zipWith (*) row (pt ++ [1]))
 
 -- | Return a point fulfilling a list of constraints
 interiorPoint :: [Constraint] -> [Double]

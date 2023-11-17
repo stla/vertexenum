@@ -20,4 +20,6 @@ import Geometry.VertexEnum.LinearCombination as X ( VarIndex
                                                   , linearCombination
                                                   , constant
                                                   , cst )
-import Geometry.VertexEnum.VertexEnum        as X ( vertexenum )
+import Geometry.VertexEnum.VertexEnum        as X ( vertexenum 
+                                                  , checkConstraints
+                                                  , interiorPoint )
