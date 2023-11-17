@@ -1,5 +1,7 @@
 module Geometry.VertexEnum.VertexEnum
-  ( vertexenum )
+  ( vertexenum
+  , checkConstraints
+  , interiorPoint )
   where
 import           Control.Monad                   ( unless, when, (<$!>) )
 import           Foreign.C.Types                 ( CDouble, CUInt )
@@ -8,7 +10,7 @@ import           Foreign.Marshal.Array           ( peekArray, pokeArray )
 import           Foreign.Storable                ( peek, sizeOf )
 import           Geometry.VertexEnum.CVertexEnum ( c_intersections )
 import           Geometry.VertexEnum.Constraint  ( Constraint )
-import           Geometry.VertexEnum.Internal    ( interiorPoint, normalizeConstraints )
+import           Geometry.VertexEnum.Internal    ( iPoint, normalizeConstraints )
 
 hsintersections :: [[Double]]     -- halfspaces
                  -> [Double]       -- interior point
@@ -57,5 +59,28 @@ vertexenum constraints point = do
   let halfspacesMatrix = normalizeConstraints constraints
       ipoint = case point of 
         Just x  -> x
-        Nothing -> interiorPoint halfspacesMatrix
+        Nothing -> iPoint halfspacesMatrix
   hsintersections halfspacesMatrix ipoint True
+
+-- | Check whether a point fulfills some constraints; returns the 
+-- difference between the upper member and the lower member for each
+-- constraint, which is positive in case if the constraint is fulfilled
+checkConstraints :: [Constraint] -- ^ list of inequalities
+                 -> [Double]     -- ^ point to be tested
+                 -> [Double]     -- ^ differences
+checkConstraints constraints point = 
+  if nvars == length point 
+    then 
+      map (checkRow point) halfspacesMatrix
+    else 
+      error "The length of the point does not match the number of variables."
+  where
+    halfspacesMatrix = normalizeConstraints constraints
+    nvars = length (head halfspacesMatrix)
+    checkRow pt row = - sum (zipWith (*) row pt)
+
+-- | Return a point fulfilling a list of constraints
+interiorPoint :: [Constraint] -> [Double]
+interiorPoint constraints = iPoint halfspacesMatrix
+  where
+    halfspacesMatrix = normalizeConstraints constraints

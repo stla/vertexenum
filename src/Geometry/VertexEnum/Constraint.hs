@@ -1,6 +1,6 @@
 {-# LANGUAGE InstanceSigs #-}
 module Geometry.VertexEnum.Constraint
-  (  Sense (..)
+  ( Sense (..)
   , Constraint (..)
   , (.>=.)
   , (.<=.)

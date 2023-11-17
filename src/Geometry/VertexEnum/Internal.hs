@@ -1,7 +1,7 @@
 module Geometry.VertexEnum.Internal
   ( normalizeConstraints
   , varsOfConstraint
-  , interiorPoint )
+  , iPoint )
   where
 import           Data.IntMap.Strict                    ( IntMap, mergeWithKey )
 import qualified Data.IntMap.Strict                    as IM
@@ -65,8 +65,8 @@ inequality row = (coeffs ++ [1.0]) :<=: bound
 inequalities :: [[Double]] -> Constraints
 inequalities normConstraints = Dense (map inequality normConstraints)
 
-interiorPoint :: [[Double]] -> [Double]
-interiorPoint halfspacesMatrix = case solution of
+iPoint :: [[Double]] -> [Double]
+iPoint halfspacesMatrix = case solution of
   Optimal (_, point) -> init point
   _                  -> error "Failed to find interior point."
   where
