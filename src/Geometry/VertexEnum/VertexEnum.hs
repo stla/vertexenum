@@ -65,19 +65,20 @@ vertexenum constraints point = do
 -- | Check whether a point fulfills some constraints; returns the 
 -- difference between the upper member and the lower member for each
 -- constraint, which is positive in case if the constraint is fulfilled
-checkConstraints :: [Constraint] -- ^ list of inequalities
-                 -> [Double]     -- ^ point to be tested
-                 -> [Double]     -- ^ differences
+checkConstraints :: [Constraint]     -- ^ list of inequalities
+                 -> [Double]         -- ^ point to be tested
+                 -> [(Double, Bool)] -- ^ difference and status for each constraint
 checkConstraints constraints point = 
   if nvars == length point + 1
     then 
-      map (checkRow point) halfspacesMatrix
+      zip differences (map (>= 0) differences)
     else 
       error "The length of the point does not match the number of variables."
   where
     halfspacesMatrix = normalizeConstraints constraints
     nvars = length (head halfspacesMatrix)
     checkRow pt row = - sum (zipWith (*) row (pt ++ [1]))
+    differences = map (checkRow point) halfspacesMatrix
 
 -- | Return a point fulfilling a list of constraints
 interiorPoint :: [Constraint] -> [Double]
