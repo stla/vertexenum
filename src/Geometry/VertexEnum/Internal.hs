@@ -7,6 +7,8 @@ import           Data.List                             ( nub, union )
 import           Data.Ratio                            ( (%), numerator, denominator )
 import           Geometry.VertexEnum.Constraint        ( Constraint (..), Sense (..) )
 import           Geometry.VertexEnum.LinearCombination ( LinearCombination (..), VarIndex )
+import Numeric.LinearProgramming
+
 
 normalizeLinearCombination :: 
   [VarIndex] -> LinearCombination -> IntMap Rational
@@ -48,3 +50,22 @@ normalizeConstraints constraints =
   map (normalizeConstraint vars) constraints
   where
     vars = nub $ concatMap varsOfConstraint constraints
+
+
+inequality :: [Double] -> Bound [Double]
+inequality row = (coeffs ++ [1.0]) :<=: bound
+  where
+    coeffs = init row
+    bound = -(last row)
+
+inequalities :: [[Double]] -> Constraints
+inequalities normConstraints = Dense (map inequality normConstraints)
+
+interiorPoint :: [Constraint] -> Solution
+interiorPoint constraints = simplex objective constraints' bounds
+  where
+    normConstraints = normalizeConstraints constraints
+    constraints' = inequalities normConstraints
+    n = length (head normConstraints)
+    objective = Maximize (replicate (n-1) 0 ++ [1])
+    bounds = map Free [1 .. (n-1)]

@@ -1,18 +1,27 @@
 {-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE InstanceSigs #-}
 module Geometry.VertexEnum.LinearCombination
+  ( LinearCombination (..)
+  , newVar
+  , VarIndex
+  , linearCombination
+  , constant
+  , cst
+  )
   where
-import           Data.AdditiveGroup
+import Data.AdditiveGroup           ( AdditiveGroup(zeroV, negateV, (^+^)) )
 import           Data.IntMap.Strict ( IntMap, mergeWithKey )
 import qualified Data.IntMap.Strict as IM
-import           Data.List
+import           Data.List          ( intercalate )
 import           Data.Ratio         ( numerator, denominator ) 
 import           Data.Tuple         ( swap )
-import           Data.VectorSpace
+import           Data.VectorSpace   ( linearCombo, VectorSpace(..) )
 
 newtype LinearCombination = LinearCombination (IntMap Rational)
   deriving Eq
 
 instance Show LinearCombination where
+  show :: LinearCombination -> String
   show (LinearCombination x) =
     intercalate " + " $
       map (\(i, r) -> if i == 0
