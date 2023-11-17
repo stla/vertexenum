@@ -4,8 +4,7 @@ import           Data.Ratio                   ((%))
 import           Data.VectorSpace
 import           Geometry.VertexEnum.Constraint        (Constraint (..), (.<=), (.<=.),
                                                (.>=), (.>=.))
-import           Geometry.VertexEnum.LinearCombination (constant, cst, linearCombination,
-                                               newVar)
+import           Geometry.VertexEnum.LinearCombination (cst, newVar)
 
 testSmall :: [Constraint]
 testSmall = [ x .<= 1, x .>= 0, y .<= 1]

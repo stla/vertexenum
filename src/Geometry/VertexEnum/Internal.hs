@@ -1,5 +1,7 @@
 module Geometry.VertexEnum.Internal
-  ( normalizeConstraints, varsOfConstraint )
+  ( normalizeConstraints
+  , varsOfConstraint
+  , interiorPoint )
   where
 import           Data.IntMap.Strict                    ( IntMap, mergeWithKey )
 import qualified Data.IntMap.Strict                    as IM
@@ -7,7 +9,11 @@ import           Data.List                             ( nub, union )
 import           Data.Ratio                            ( (%), numerator, denominator )
 import           Geometry.VertexEnum.Constraint        ( Constraint (..), Sense (..) )
 import           Geometry.VertexEnum.LinearCombination ( LinearCombination (..), VarIndex )
-import Numeric.LinearProgramming
+import           Numeric.LinearProgramming             ( simplex,
+                                                         Bound(Free, (:<=:)),
+                                                         Constraints(Dense),
+                                                         Optimization(Maximize),
+                                                         Solution(Optimal) )
 
 
 normalizeLinearCombination :: 
@@ -61,11 +67,15 @@ inequality row = (coeffs ++ [1.0]) :<=: bound
 inequalities :: [[Double]] -> Constraints
 inequalities normConstraints = Dense (map inequality normConstraints)
 
-interiorPoint :: [Constraint] -> Solution
-interiorPoint constraints = simplex objective constraints' bounds
+interiorPoint :: [Constraint] -> [Double]
+interiorPoint constraints = case solution of
+  Optimal (_, point) -> init point
+  _                  -> error "Failed to find interior point."
   where
     normConstraints = normalizeConstraints constraints
     constraints' = inequalities normConstraints
     n = length (head normConstraints)
     objective = Maximize (replicate (n-1) 0 ++ [1])
     bounds = map Free [1 .. (n-1)]
+    solution = simplex objective constraints' bounds
+
