@@ -11,6 +11,5 @@ module Geometry.VertexEnum
   ( module X )
   where
 import           Geometry.VertexEnum.Constraint        as X
-import           Geometry.VertexEnum.Examples          as X
 import           Geometry.VertexEnum.LinearCombination as X
-import           Geometry.VertexEnum.Internal          as X
+import           Geometry.VertexEnum.VertexEnum          as X

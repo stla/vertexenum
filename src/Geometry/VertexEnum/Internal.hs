@@ -67,14 +67,13 @@ inequality row = (coeffs ++ [1.0]) :<=: bound
 inequalities :: [[Double]] -> Constraints
 inequalities normConstraints = Dense (map inequality normConstraints)
 
-interiorPoint :: [Constraint] -> [Double]
-interiorPoint constraints = case solution of
+interiorPoint :: [[Double]] -> [Double]
+interiorPoint halfspacesMatrix = case solution of
   Optimal (_, point) -> init point
   _                  -> error "Failed to find interior point."
   where
-    normConstraints = normalizeConstraints constraints
-    constraints' = inequalities normConstraints
-    n = length (head normConstraints)
+    constraints' = inequalities halfspacesMatrix
+    n = length (head halfspacesMatrix)
     objective = Maximize (replicate (n-1) 0 ++ [1])
     bounds = map Free [1 .. (n-1)]
     solution = simplex objective constraints' bounds

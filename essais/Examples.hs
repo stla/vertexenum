@@ -1,9 +1,8 @@
 module Geometry.VertexEnum.Examples
   where
-import           Data.Ratio                   ((%))
-import           Data.VectorSpace
-import           Geometry.VertexEnum.Constraint        (Constraint (..), (.<=), (.<=.),
-                                               (.>=), (.>=.))
+import           Data.Ratio                            ( (%) )
+import           Data.VectorSpace                      ( AdditiveGroup((^-^)), VectorSpace((*^)) )
+import           Geometry.VertexEnum.Constraint        ( Constraint (..), (.<=), (.<=.), (.>=))
 import           Geometry.VertexEnum.LinearCombination (cst, newVar)
 
 testSmall :: [Constraint]
