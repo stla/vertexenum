@@ -9,10 +9,9 @@ double** intersections(
   unsigned* nintersections,
   unsigned* exitcode,
   unsigned  print
-)
-{
+) {
   char opts[250];
-  snprintf(opts, sizeof(opts),  "qhull s Fp H H");
+  snprintf(opts, sizeof(opts), "qhull s Fp H H");
   for(unsigned i = 0; i < dim; i++) {
     int integerPart = ipoint[i];                      // Get integer part.
     double fracPart = fabs(ipoint[i] - integerPart);  // Get fractional part.

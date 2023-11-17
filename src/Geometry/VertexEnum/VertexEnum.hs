@@ -10,11 +10,11 @@ import           Geometry.VertexEnum.CVertexEnum ( c_intersections )
 import           Geometry.VertexEnum.Constraint  ( Constraint )
 import           Geometry.VertexEnum.Internal    ( interiorPoint, normalizeConstraints )
 
-hsintersections' :: [[Double]]     -- halfspaces
+hsintersections :: [[Double]]     -- halfspaces
                  -> [Double]       -- interior point
                  -> Bool           -- print to stdout
                  -> IO [[Double]]
-hsintersections' halfspaces ipoint stdout = do
+hsintersections halfspaces ipoint stdout = do
   let n     = length halfspaces
       dim   = length ipoint
   unless (all ((== dim+1) . length) halfspaces) $
@@ -44,7 +44,7 @@ hsintersections' halfspaces ipoint stdout = do
       nintersections <- (<$!>) fromIntegral (peek nintersectionsPtr)
       result <- (<$!>) (map (map realToFrac))
                        ((=<<) (mapM (peekArray dim))
-                             (peekArray nintersections resultPtr))
+                              (peekArray nintersections resultPtr))
       free resultPtr
       free nintersectionsPtr
       return result
@@ -58,4 +58,4 @@ vertexenum constraints point = do
       ipoint = case point of 
         Just x  -> x
         Nothing -> interiorPoint halfspacesMatrix
-  hsintersections' halfspacesMatrix ipoint True
+  hsintersections halfspacesMatrix ipoint True

@@ -15,7 +15,6 @@ import           Numeric.LinearProgramming             ( simplex,
                                                          Optimization(Maximize),
                                                          Solution(Optimal) )
 
-
 normalizeLinearCombination :: 
   [VarIndex] -> LinearCombination -> IntMap Rational
 normalizeLinearCombination vars (LinearCombination lc) =
@@ -76,4 +75,3 @@ interiorPoint halfspacesMatrix = case solution of
     objective = Maximize (replicate (n-1) 0 ++ [1])
     bounds = map Free [1 .. (n-1)]
     solution = simplex objective constraints' bounds
-
