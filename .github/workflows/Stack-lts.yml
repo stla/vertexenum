@@ -29,7 +29,7 @@ jobs:
 
       - name: Install system dependencies
         run: |
-          sudo apt-get install --yes glpk-utils libglpk-dev glpk-doc python-glpk
+          sudo apt-get install --yes glpk-utils libglpk-dev
 
       - uses: freckle/stack-action@v3
 
