@@ -2,11 +2,11 @@
 module Geometry.VertexEnum.LinearCombination
   where
 import           Data.AdditiveGroup
-import           Data.IntMap.Strict (IntMap, mergeWithKey)
+import           Data.IntMap.Strict ( IntMap, mergeWithKey )
 import qualified Data.IntMap.Strict as IM
 import           Data.List
-import           Data.Ratio
-import           Data.Tuple         (swap)
+import           Data.Ratio         ( numerator, denominator ) 
+import           Data.Tuple         ( swap )
 import           Data.VectorSpace
 
 newtype LinearCombination = LinearCombination (IntMap Rational)
@@ -50,7 +50,7 @@ newVar i = if i >= 0
             else error "negative index"
 
 -- | linear combination from list of terms
-linearCombination :: [(Rational,Var)] -> LinearCombination
+linearCombination :: [(Rational, Var)] -> LinearCombination
 linearCombination terms = linearCombo (map swap terms)
 --  LinearCombination (IM.fromListWith (+) (map swap terms))
 

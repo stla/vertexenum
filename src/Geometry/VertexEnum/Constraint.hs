@@ -1,7 +1,7 @@
 module Geometry.VertexEnum.Constraint
   where
-import           Data.Ratio                   (Rational)
-import           Geometry.VertexEnum.LinearCombination (LinearCombination, constant)
+import           Data.Ratio                            ( Rational )
+import           Geometry.VertexEnum.LinearCombination ( LinearCombination, constant )
 
 data Sense = Gt | Lt
   deriving Eq

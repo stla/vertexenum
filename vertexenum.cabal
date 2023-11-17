@@ -20,6 +20,7 @@ library
   exposed-modules:     Geometry.VertexEnum
   other-modules:       Geometry.VertexEnum.Constraint
                      , Geometry.VertexEnum.Examples
+                     , Geometry.VertexEnum.Internal
                      , Geometry.VertexEnum.LinearCombination
   build-depends:       base >= 4.7 && < 5
                      , containers >= 0.6.4.1

@@ -1,14 +1,15 @@
 module Geometry.VertexEnum.Internal
-  (normalizeConstraints, varsOfConstraint)
+  ( normalizeConstraints, varsOfConstraint )
   where
-import           Data.IntMap.Strict           (IntMap, mergeWithKey)
-import qualified Data.IntMap.Strict           as IM
-import           Data.List                    (nub, union)
-import           Data.Ratio
-import           Geometry.VertexEnum.Constraint        (Constraint (..), Sense (..))
-import           Geometry.VertexEnum.LinearCombination (LinearCombination (..), VarIndex)
+import           Data.IntMap.Strict                    ( IntMap, mergeWithKey )
+import qualified Data.IntMap.Strict                    as IM
+import           Data.List                             ( nub, union )
+import           Data.Ratio                            ( numerator, denominator )
+import           Geometry.VertexEnum.Constraint        ( Constraint (..), Sense (..) )
+import           Geometry.VertexEnum.LinearCombination ( LinearCombination (..), VarIndex )
 
-normalizeLinearCombination :: [VarIndex] -> LinearCombination -> IntMap Rational
+normalizeLinearCombination :: 
+  [VarIndex] -> LinearCombination -> IntMap Rational
 normalizeLinearCombination vars (LinearCombination lc) =
   IM.union lc (IM.fromList [(i,0) | i <- vars `union` [0]])
 
@@ -41,6 +42,7 @@ normalizeConstraint vars (Constraint lhs sense rhs) =
   --       rhs' = normalizeLinearCombination vars rhs
 
 normalizeConstraints :: [Constraint] -> [[Double]] -- for qhalf
-normalizeConstraints constraints = map (normalizeConstraint vars) constraints
+normalizeConstraints constraints = 
+  map (normalizeConstraint vars) constraints
   where
     vars = nub $ concatMap varsOfConstraint constraints
