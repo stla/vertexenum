@@ -1,8 +1,8 @@
 module Examples
   where
-import           Data.Ratio                            ( (%) )
-import           Data.VectorSpace                      ( AdditiveGroup((^-^)), VectorSpace((*^)) )
-import           Geometry.VertexEnum
+import Data.Ratio           ( (%) )
+import Data.VectorSpace     ( AdditiveGroup((^-^)), VectorSpace((*^)) )
+import Geometry.VertexEnum
 
 testSmall :: [Constraint]
 testSmall = [ x .<= 1, x .>= 0, y .<= 1]
