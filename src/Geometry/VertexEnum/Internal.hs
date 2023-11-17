@@ -13,7 +13,13 @@ import           Numeric.LinearProgramming             ( simplex,
                                                          Bound(Free, (:<=:)),
                                                          Constraints(Dense),
                                                          Optimization(Maximize),
-                                                         Solution(Optimal) )
+                                                         Solution(
+                                                          Undefined
+                                                        , Feasible
+                                                        , Infeasible
+                                                        , NoFeasible
+                                                        , Optimal
+                                                        , Unbounded) )
 
 normalizeLinearCombination :: 
   [VarIndex] -> LinearCombination -> IntMap Rational
@@ -68,7 +74,11 @@ inequalities normConstraints = Dense (map inequality normConstraints)
 iPoint :: [[Double]] -> [Double]
 iPoint halfspacesMatrix = case solution of
   Optimal (_, point) -> init point
-  _                  -> error "Failed to find interior point."
+  Undefined          -> error "Failed to find interior point (undefined)."
+  Feasible (_, _)    -> error "Failed to find interior point (feasible)."
+  Infeasible (_, _)  -> error "Failed to find interior point (infeasible)."
+  NoFeasible         -> error "Failed to find interior point (no feasible)."
+  Unbounded          -> error "Failed to find interior point (unbounded)."  
   where
     constraints' = inequalities halfspacesMatrix
     n = length (head halfspacesMatrix)
