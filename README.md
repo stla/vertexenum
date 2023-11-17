@@ -33,3 +33,10 @@ constraints =
 
 vertexenum constraints Nothing
 ```
+
+The type of the second argument of `vertexenum` is `Maybe [Double]`. If this 
+argument is `Just point`, then `point` must be the coordinates of a point 
+interior to the polytope. If this argument is `Nothing`, an interior point 
+is automatically calculated. You can get it with the `interiorPoint` function. 
+It is easy to mentally get an interior point for the above example, but in 
+general this is not an easy problem.
