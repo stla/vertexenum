@@ -1,5 +1,5 @@
 module Geometry.VertexEnum.VertexEnum
-  ( vertexenum, cubeConstraints' )
+  ( vertexenum )
   where
 import           Control.Monad                   ( unless, when, (<$!>) )
 import           Foreign.C.Types                 ( CDouble, CUInt )
@@ -58,11 +58,3 @@ vertexenum constraints point = do
         Just x  -> x
         Nothing -> interiorPoint halfspacesMatrix
   hsintersections' halfspacesMatrix ipoint True
-
-cubeConstraints' :: [[Double]]
-cubeConstraints' = [[ 1, 0, 0,-1]
-                   ,[-1, 0, 0,-1]
-                   ,[ 0, 1, 0,-1]
-                   ,[ 0,-1, 0,-1]
-                   ,[ 0, 0, 1,-1]
-                   ,[ 0, 0,-1,-1]]

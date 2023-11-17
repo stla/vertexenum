@@ -1,9 +1,8 @@
-module Geometry.VertexEnum.Examples
+module Examples
   where
 import           Data.Ratio                            ( (%) )
 import           Data.VectorSpace                      ( AdditiveGroup((^-^)), VectorSpace((*^)) )
-import           Geometry.VertexEnum.Constraint        ( Constraint (..), (.<=), (.<=.), (.>=))
-import           Geometry.VertexEnum.LinearCombination (cst, newVar)
+import           Geometry.VertexEnum
 
 testSmall :: [Constraint]
 testSmall = [ x .<= 1, x .>= 0, y .<= 1]
@@ -49,3 +48,11 @@ cubeConstraints =
     x = newVar 1
     y = newVar 2
     z = newVar 3
+
+cubeConstraints' :: [[Double]]
+cubeConstraints' = [[ 1, 0, 0,-1]
+                   ,[-1, 0, 0,-1]
+                   ,[ 0, 1, 0,-1]
+                   ,[ 0,-1, 0,-1]
+                   ,[ 0, 0, 1,-1]
+                   ,[ 0, 0,-1,-1]]

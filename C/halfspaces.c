@@ -1,5 +1,6 @@
 #define qh_QHimport
 #include "qhull_ra.h"
+#include <stdio.h>
 
 double** intersections(
   double*   halfspaces,
@@ -12,13 +13,21 @@ double** intersections(
 )
 {
   char opts[250];
-  sprintf(opts, "qhull s Fp FF H H%f", interiorpoint[0]); //, interiorpoint[1] , interiorpoint[2]);
-  for(unsigned i=1; i < dim; i++){
-    char x[20];
-    sprintf(x, ",%f", interiorpoint[i]);
-    strcat(opts, x);
+  snprintf(opts, sizeof(opts),  "qhull s Fp H H");
+  for(unsigned i = 0; i < dim; i++){
+    int integerPart = interiorpoint[i];                // Get the integer part.
+    double fracPart = interiorpoint[i] - integerPart;  // Get the fractional part.
+    int fractPart_e8 = trunc(fracPart * 1e8);          // Turn into integer.
+    //char x[100];
+    snprintf(
+      opts + strlen(opts), 
+      sizeof(opts) - strlen(opts), 
+      "%s%d.%d", i == 0 ? "" : ",", integerPart, fractPart_e8
+    );
+    //sprintf(x, ",%.16f", interiorpoint[i]);
+    //strcat(opts, x);
   }
-  printf(opts); printf("\n");
+  printf("%s", opts); printf("\n");
 
   qhT qh_qh; /* Qhull's data structure */
   qhT* qh= &qh_qh;
@@ -28,8 +37,8 @@ double** intersections(
   FILE *errfile   = NULL;
   FILE* outfile = print ? stdout : NULL;
   qh_zero(qh, errfile);
-  *exitcode = qh_new_qhull(qh, dim+1, n, halfspaces, ismalloc, opts, outfile,
-                           errfile);
+  *exitcode = qh_new_qhull(
+    qh, dim+1, n, halfspaces, ismalloc, opts, outfile, errfile);
   printf("exitcode: %u\n", *exitcode);
 
   double** out;
