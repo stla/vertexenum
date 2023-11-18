@@ -60,7 +60,7 @@ vertexenum constraints point = do
       ipoint = case point of 
         Just x  -> x
         Nothing -> iPoint halfspacesMatrix
-  hsintersections halfspacesMatrix ipoint True
+  hsintersections halfspacesMatrix ipoint False
 
 -- | Check whether a point fulfills some constraints; returns the 
 -- difference between the upper member and the lower member for each
