@@ -13,8 +13,8 @@ import           Geometry.VertexEnum.Constraint  ( Constraint )
 import           Geometry.VertexEnum.Internal    ( iPoint, normalizeConstraints )
 
 hsintersections :: [[Double]]     -- halfspaces
-                 -> [Double]       -- interior point
-                 -> Bool           -- print to stdout
+                 -> [Double]      -- interior point
+                 -> Bool          -- print to stdout
                  -> IO [[Double]]
 hsintersections halfspaces ipoint stdout = do
   let n     = length halfspaces
@@ -52,7 +52,7 @@ hsintersections halfspaces ipoint stdout = do
       return result
 
 -- | Vertex enumeration
-vertexenum :: [Constraint]   -- ^ list of inequalities
+vertexenum :: Real a => [Constraint a]   -- ^ list of inequalities
            -> Maybe [Double] -- ^ point in the interior of the polytope
            -> IO [[Double]]
 vertexenum constraints point = do
@@ -65,7 +65,7 @@ vertexenum constraints point = do
 -- | Check whether a point fulfills some constraints; returns the 
 -- difference between the upper member and the lower member for each
 -- constraint, which is positive in case if the constraint is fulfilled
-checkConstraints :: [Constraint]     -- ^ list of inequalities
+checkConstraints :: Real a => [Constraint a]     -- ^ list of inequalities
                  -> [Double]         -- ^ point to be tested
                  -> [(Double, Bool)] -- ^ difference and status for each constraint
 checkConstraints constraints point = 
@@ -81,7 +81,7 @@ checkConstraints constraints point =
     differences = map (checkRow point) halfspacesMatrix
 
 -- | Return a point fulfilling a list of constraints
-interiorPoint :: [Constraint] -> [Double]
+interiorPoint :: Real a => [Constraint a] -> [Double]
 interiorPoint constraints = iPoint halfspacesMatrix
   where
     halfspacesMatrix = normalizeConstraints constraints

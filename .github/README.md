@@ -17,12 +17,11 @@ a convex polytope. The `vertexenum` function can calculate the vertices of this
 polytope:
 
 ```haskell
-import Data.Ratio           ( (%) )
 import Data.VectorSpace     ( AdditiveGroup((^+^), (^-^))
                             , VectorSpace((*^)) )
 import Geometry.VertexEnum
 
-constraints :: [Constraint]
+constraints :: [Constraint Double]
 constraints =
   [ x .>= (-5)         -- shortcut for `x .>=. cst (-5)`
   , x .<=  4

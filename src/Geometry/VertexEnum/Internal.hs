@@ -6,7 +6,6 @@ module Geometry.VertexEnum.Internal
 import           Data.IntMap.Strict                    ( IntMap, mergeWithKey )
 import qualified Data.IntMap.Strict                    as IM
 import           Data.List                             ( nub, union )
-import           Data.Ratio                            ( (%), numerator, denominator )
 import           Geometry.VertexEnum.Constraint        ( Constraint (..), Sense (..) )
 import           Geometry.VertexEnum.LinearCombination ( LinearCombination (..), VarIndex )
 import           Numeric.LinearProgramming             ( simplex,
@@ -22,18 +21,18 @@ import           Numeric.LinearProgramming             ( simplex,
                                                         , Unbounded) )
 
 normalizeLinearCombination :: 
-  [VarIndex] -> LinearCombination -> IntMap Rational
+  Num a => [VarIndex] -> LinearCombination a -> IntMap a
 normalizeLinearCombination vars (LinearCombination lc) =
   IM.union lc (IM.fromList [(i,0) | i <- vars `union` [0]])
 
-varsOfLinearCombo :: LinearCombination -> [VarIndex]
+varsOfLinearCombo :: LinearCombination a -> [VarIndex]
 varsOfLinearCombo (LinearCombination imap) = IM.keys imap
 
-varsOfConstraint :: Constraint -> [VarIndex]
+varsOfConstraint :: Constraint a -> [VarIndex]
 varsOfConstraint (Constraint lhs _ rhs) =
   varsOfLinearCombo lhs `union` varsOfLinearCombo rhs
 
-normalizeConstraint :: [VarIndex] -> Constraint -> [Double]
+normalizeConstraint :: Real a => [VarIndex] -> Constraint a -> [Double]
 normalizeConstraint vars (Constraint lhs sense rhs) =
   if sense == Lt
     then xs ++ [x]
@@ -42,9 +41,9 @@ normalizeConstraint vars (Constraint lhs sense rhs) =
     lhs' = normalizeLinearCombination vars lhs
     rhs' = normalizeLinearCombination vars rhs
     coefs = IM.elems $ mergeWithKey (\_ a b -> Just (a-b)) id id lhs' rhs'
-    denominators = map denominator coefs
-    ppcm = foldr lcm 1 denominators % 1
-    (x, xs) = case map (realToFrac . numerator . (*ppcm)) coefs of
+    coefs' :: [Double]
+    coefs' = map realToFrac coefs
+    (x, xs) = case coefs' of
       (xx:xxs)  -> (xx, xxs)
       [] -> (0, [])
   -- let (x:xs) = map realToFrac $
@@ -56,7 +55,7 @@ normalizeConstraint vars (Constraint lhs sense rhs) =
   -- where lhs' = normalizeLinearCombination vars lhs
   --       rhs' = normalizeLinearCombination vars rhs
 
-normalizeConstraints :: [Constraint] -> [[Double]] -- for qhalf
+normalizeConstraints :: Real a => [Constraint a] -> [[Double]] -- for qhalf
 normalizeConstraints constraints = 
   map (normalizeConstraint vars) constraints
   where

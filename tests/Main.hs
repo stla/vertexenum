@@ -5,7 +5,7 @@ import Geometry.VertexEnum  ( (.<=), (.>=), Constraint, newVar
 import Test.Tasty           ( defaultMain, testGroup )
 import Test.Tasty.HUnit     ( testCase, assertEqual, assertBool )
 
-cubeConstraints :: [Constraint]
+cubeConstraints :: [Constraint Double]
 cubeConstraints =
   [ x .<= 1
   , x .>= (-1)

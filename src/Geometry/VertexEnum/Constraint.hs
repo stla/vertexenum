@@ -17,19 +17,22 @@ instance Show Sense where
   show Gt = ">="
   show Lt = "<="
 
-data Constraint = Constraint LinearCombination Sense LinearCombination
-  deriving (Eq, Show)
+data Constraint a = Constraint (LinearCombination a) Sense (LinearCombination a)
 
-(.>=.) :: LinearCombination -> LinearCombination -> Constraint
-(.>=.) lhs rhs = Constraint lhs Gt rhs
+instance Show a => Show (Constraint a) where 
+  show :: Constraint a -> String
+  show (Constraint lhs sense rhs) = show lhs ++ " " ++ show sense ++ " " ++ show rhs 
 
-(.<=.) :: LinearCombination -> LinearCombination -> Constraint
-(.<=.) lhs rhs = Constraint lhs Lt rhs
+(.>=.) :: LinearCombination a -> LinearCombination a -> Constraint a
+(.>=.) lhs = Constraint lhs Gt
 
-(.>=) :: LinearCombination -> Rational -> Constraint
+(.<=.) :: LinearCombination a -> LinearCombination a -> Constraint a
+(.<=.) lhs = Constraint lhs Lt
+
+(.>=) :: LinearCombination a -> a -> Constraint a
 (.>=) lhs x = (.>=.) lhs (constant x)
 
-(.<=) :: LinearCombination -> Rational -> Constraint
+(.<=) :: LinearCombination a -> a -> Constraint a
 (.<=) lhs x = (.<=.) lhs (constant x)
 
 infix 4 .<=., .>=.

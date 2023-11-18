@@ -1,9 +1,9 @@
 cabal-version:       2.2
 
 name:                vertexenum
-version:             0.1.0.0
+version:             0.1.1.0
 synopsis:            Vertex enumeration
-description:         Vertex enumeration of convex polytopes.
+description:         Vertex enumeration of convex polytopes given by linear inequalities.
 homepage:            https://github.com/stla/vertexenum#readme
 license:             GPL-3.0-only
 license-file:        LICENSE

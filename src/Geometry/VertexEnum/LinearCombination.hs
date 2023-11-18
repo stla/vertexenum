@@ -13,64 +13,59 @@ import           Data.AdditiveGroup ( AdditiveGroup(zeroV, negateV, (^+^)) )
 import           Data.IntMap.Strict ( IntMap, mergeWithKey )
 import qualified Data.IntMap.Strict as IM
 import           Data.List          ( intercalate )
-import           Data.Ratio         ( numerator, denominator ) 
 import           Data.Tuple         ( swap )
 import           Data.VectorSpace   ( linearCombo, VectorSpace(..) )
 
-newtype LinearCombination = LinearCombination (IntMap Rational)
-  deriving Eq
+newtype LinearCombination a = LinearCombination (IntMap a)
 
-instance Show LinearCombination where
-  show :: LinearCombination -> String
+instance (Eq a) => Eq (LinearCombination a) where
+  (==) :: LinearCombination a -> LinearCombination a -> Bool
+  (==) (LinearCombination x) (LinearCombination y) = x == y
+
+instance (Show a) => Show (LinearCombination a) where
+  show :: LinearCombination a -> String
   show (LinearCombination x) =
     intercalate " + " $
       map (\(i, r) -> if i == 0
-                      then showRational r
-                      else if r == 1
-                            then "x" ++ show i
-                            else showRational r ++ "*x" ++ show i)
+                      then show r
+                      else show r ++ "*x" ++ show i
+          )
           (IM.toAscList x)
-    where
-      showRational :: Rational -> String
-      showRational r = if q == 1 then show p else show p ++ "/" ++ show q
-                       where
-                        p = numerator r
-                        q = denominator r
 
-instance AdditiveGroup LinearCombination where
-  zeroV :: LinearCombination
+instance Num a => AdditiveGroup (LinearCombination a) where
+  zeroV :: LinearCombination a
   zeroV = LinearCombination (IM.singleton 0 0)
-  (^+^) :: LinearCombination -> LinearCombination -> LinearCombination
+  (^+^) :: LinearCombination a -> LinearCombination a -> LinearCombination a
   (^+^) (LinearCombination imap1) (LinearCombination imap2) =
     LinearCombination
     (mergeWithKey (\_ x y -> Just (x+y)) id id imap1 imap2)
-  negateV :: LinearCombination -> LinearCombination
+  negateV :: LinearCombination a -> LinearCombination a
   negateV (LinearCombination imap) = LinearCombination (IM.map negate imap)
 
-instance VectorSpace LinearCombination where
-  type Scalar LinearCombination = Rational
-  (*^) :: Scalar LinearCombination -> LinearCombination -> LinearCombination
+instance Num a => VectorSpace (LinearCombination a) where
+  type Scalar (LinearCombination a) = a
+  (*^) :: Scalar (LinearCombination a) -> LinearCombination a -> LinearCombination a
   (*^) lambda (LinearCombination imap) =
     LinearCombination (IM.map (*lambda) imap)
 
-type Var = LinearCombination
+type Var a = LinearCombination a
 type VarIndex = Int
 
 -- | new variable
-newVar :: VarIndex -> Var
+newVar :: Num a => VarIndex -> Var a
 newVar i = if i >= 0
             then LinearCombination (IM.singleton i 1)
             else error "negative index"
 
 -- | linear combination from list of terms
-linearCombination :: [(Rational, Var)] -> LinearCombination
+linearCombination :: Num a => [(a, Var a)] -> LinearCombination a
 linearCombination terms = linearCombo (map swap terms)
 --  LinearCombination (IM.fromListWith (+) (map swap terms))
 
 -- | constant linear combination
-constant :: Rational -> LinearCombination
+constant :: a -> LinearCombination a
 constant x = LinearCombination (IM.singleton 0 x)
 
 -- | alias for `constant`
-cst :: Rational -> LinearCombination
+cst :: a -> LinearCombination a
 cst = constant
