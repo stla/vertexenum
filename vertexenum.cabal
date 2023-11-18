@@ -24,9 +24,9 @@ library
                      , Geometry.VertexEnum.CVertexEnum
                      , Geometry.VertexEnum.VertexEnum
   build-depends:       base >= 4.7 && < 5
-                     , containers >= 0.6.2.1
-                     , hmatrix-glpk >= 0.19.0.0
-                     , vector-space >= 0.15
+                     , containers >= 0.6.2.1 && < 0.8
+                     , hmatrix-glpk >= 0.19.0.0 && < 0.20
+                     , vector-space >= 0.15 && < 0.17
   other-extensions:    ForeignFunctionInterface
                      , TypeFamilies
                      , InstanceSigs
