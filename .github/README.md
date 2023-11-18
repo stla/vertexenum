@@ -10,7 +10,7 @@ ____
 
 Consider the following system of linear inequalities:
 
-$$\left\{\begin{matrix} -5 & \leqslant & x & \leqslant & 4 \\ -5 & \leqslant & y & \leqslant & 3-x \\ -10 & \leqslant & z & \leqslant & 6-2x-y \end{matrix}.\right.$$
+$$\left\{\begin{matrix} -5 & \leqslant & x & \leqslant & 4 \\\ -5 & \leqslant & y & \leqslant & 3-x \\\ -10 & \leqslant & z & \leqslant & 6-2x-y \end{matrix}.\right.$$
 
 Each inequality defines a halfspace. The intersection of the six halfspaces is
 a convex polytope. The `vertexenum` function can calculate the vertices of this 
