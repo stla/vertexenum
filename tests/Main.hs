@@ -1,8 +1,10 @@
 module Main where
-import           Approx                 ( assertApproxZero )
-import           Geometry.VertexEnum    
-import           Test.Tasty             ( defaultMain, testGroup )
-import           Test.Tasty.HUnit       ( testCase, assertEqual )
+import Approx                                ( assertApproxZero )
+import Geometry.VertexEnum.Constraint        ( (.<=), (.>=), Constraint )
+import Geometry.VertexEnum.LinearCombination ( newVar )
+import Geometry.VertexEnum.VertexEnum        ( vertexenum, interiorPoint )    
+import Test.Tasty                            ( defaultMain, testGroup )
+import Test.Tasty.HUnit                      ( testCase, assertEqual )
 
 cubeConstraints :: [Constraint]
 cubeConstraints =
@@ -23,7 +25,7 @@ main = defaultMain $
   [ 
 
     testCase "cube vertices" $ do
-      let vertices = vertexenum cubeConstraints (Just [0, 0, 0])
+      vertices <- vertexenum cubeConstraints (Just [0, 0, 0])
       assertEqual "" (length vertices) 8
 
   , testCase "interior point of the cube" $ do
