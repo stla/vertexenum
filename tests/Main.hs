@@ -1,10 +1,9 @@
 module Main where
-import Approx                                ( assertApproxZero )
-import Geometry.VertexEnum.Constraint        ( (.<=), (.>=), Constraint )
-import Geometry.VertexEnum.LinearCombination ( newVar )
-import Geometry.VertexEnum.VertexEnum        ( vertexenum, interiorPoint )    
-import Test.Tasty                            ( defaultMain, testGroup )
-import Test.Tasty.HUnit                      ( testCase, assertEqual )
+import Approx               ( assertApproxZero )
+import Geometry.VertexEnum  ( (.<=), (.>=), Constraint, newVar 
+                            , vertexenum, interiorPoint )    
+import Test.Tasty           ( defaultMain, testGroup )
+import Test.Tasty.HUnit     ( testCase, assertEqual )
 
 cubeConstraints :: [Constraint]
 cubeConstraints =
