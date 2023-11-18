@@ -77,8 +77,8 @@ test-suite unit-tests
   hs-source-dirs:       tests/
   other-modules:        Approx
   Build-Depends:        base >= 4.7 && < 5
-                      , tasty
-                      , tasty-hunit
+                      , tasty >= 1.4 && < 1.5
+                      , tasty-hunit >= 0.10 && < 0.11
                       , vertexenum
   Default-Language:     Haskell2010
 
