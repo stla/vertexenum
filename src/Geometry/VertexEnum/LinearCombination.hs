@@ -9,7 +9,7 @@ module Geometry.VertexEnum.LinearCombination
   , cst
   )
   where
-import Data.AdditiveGroup           ( AdditiveGroup(zeroV, negateV, (^+^)) )
+import           Data.AdditiveGroup ( AdditiveGroup(zeroV, negateV, (^+^)) )
 import           Data.IntMap.Strict ( IntMap, mergeWithKey )
 import qualified Data.IntMap.Strict as IM
 import           Data.List          ( intercalate )
