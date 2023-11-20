@@ -8,6 +8,10 @@
 
 ____
 
+This package depends on the packages **hmatrix** and **hmatrix-glpk**; follow 
+[this link](https://github.com/haskell-numerics/hmatrix/blob/master/INSTALL.md) 
+for installation instructions.
+
 Consider the following system of linear inequalities:
 
 $$\left\{\begin{matrix} -5 & \leqslant & x & \leqslant & 4 \\ -5 & \leqslant & y & \leqslant & 3-x \\ -10 & \leqslant & z & \leqslant & 6-2x-y \end{matrix}.\right.$$
