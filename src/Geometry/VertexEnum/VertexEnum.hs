@@ -4,6 +4,7 @@ module Geometry.VertexEnum.VertexEnum
   , interiorPoint )
   where
 import           Control.Monad                   ( unless, when, (<$!>) )
+import           Data.Maybe                      ( isJust, fromJust )
 import           Foreign.C.Types                 ( CDouble, CUInt )
 import           Foreign.Marshal.Alloc           ( free, mallocBytes )
 import           Foreign.Marshal.Array           ( peekArray, pokeArray )
@@ -56,11 +57,16 @@ vertexenum :: Real a => [Constraint a]   -- ^ list of inequalities
            -> Maybe [Double] -- ^ point in the interior of the polytope
            -> IO [[Double]]
 vertexenum constraints point = do
-  let halfspacesMatrix = normalizeConstraints constraints
-      ipoint = case point of 
-        Just x  -> x
-        Nothing -> iPoint halfspacesMatrix
-  hsintersections halfspacesMatrix ipoint False
+  let halfspacesMatrix = 
+        map (map realToFrac) (normalizeConstraints constraints)
+  if isJust point
+    then do
+      hsintersections halfspacesMatrix (fromJust point) False
+    else do
+      let halfspacesMatrix' =
+            map (map toRational) (normalizeConstraints constraints)
+      ipoint <- iPoint halfspacesMatrix'
+      hsintersections halfspacesMatrix ipoint False
 
 -- | Check whether a point fulfills some constraints; returns the 
 -- difference between the upper member and the lower member for each
@@ -75,13 +81,16 @@ checkConstraints constraints point =
     else 
       error "checkConstraints: the length of the point does not match the number of variables."
   where
-    halfspacesMatrix = normalizeConstraints constraints
-    nvars = length (head halfspacesMatrix)
+    halfspacesMatrix = 
+      map (map realToFrac) (normalizeConstraints constraints)
+    nvars = length (halfspacesMatrix !! 0)
     checkRow pt row = - sum (zipWith (*) row (pt ++ [1]))
     differences = map (checkRow point) halfspacesMatrix
 
--- | Return a point fulfilling a list of constraints
-interiorPoint :: Real a => [Constraint a] -> [Double]
-interiorPoint constraints = iPoint halfspacesMatrix
-  where
-    halfspacesMatrix = normalizeConstraints constraints
+-- | Returns a point fulfilling a list of constraints
+interiorPoint :: Real a => [Constraint a] -> IO [Double]
+interiorPoint constraints = do 
+  let
+    halfspacesMatrix = 
+      map (map toRational) (normalizeConstraints constraints)
+  iPoint halfspacesMatrix

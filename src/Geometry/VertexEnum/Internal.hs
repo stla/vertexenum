@@ -36,19 +36,19 @@ varsOfLinearCombo :: LinearCombination a -> [VarIndex]
 varsOfLinearCombo (LinearCombination imap) = IM.keys imap
 
 varsOfConstraint :: Constraint a -> [VarIndex]
-varsOfConstraint (Constraint lhs _ rhs) =
-  varsOfLinearCombo lhs `union` varsOfLinearCombo rhs
+varsOfConstraint (Constraint left _ right) =
+  varsOfLinearCombo left `union` varsOfLinearCombo right
 
 normalizeConstraint :: Real a => [VarIndex] -> Constraint a -> [a]
-normalizeConstraint vars (Constraint lhs sense rhs) =
+normalizeConstraint vars (Constraint left sense right) =
   if sense == Lt
     then xs ++ [x]
     else map negate xs ++ [-x]
   where
-    lhs' = normalizeLinearCombination vars lhs
-    rhs' = normalizeLinearCombination vars rhs
+    lhs' = normalizeLinearCombination vars left
+    rhs' = normalizeLinearCombination vars right
     coefs = IM.elems $ mergeWithKey (\_ a b -> Just (a-b)) id id lhs' rhs'
-    (x, xs) = case coefs' of
+    (x, xs) = case coefs of
       (xx:xxs) -> (xx, xxs)
       []       -> (0, [])
 
@@ -61,7 +61,7 @@ normalizeConstraints constraints =
 inequality :: [Rational] -> PolyConstraint
 inequality row = 
   LEQ { 
-        lhs = DM.fromList (zip [1 ..] (1 : coeffs)), rhs = -bound 
+        lhs = DM.fromList (zip [1 ..] (coeffs ++ [1])), rhs = -bound 
       } 
   where
     (coeffs, bound) = fromJust $ unsnoc row
@@ -73,6 +73,9 @@ iPoint :: [[Rational]] -> IO [Double]
 iPoint halfspacesMatrix = do
   maybeResult <- runStdoutLoggingT $ filterLogger (\_ _ -> False) $ 
                   twoPhaseSimplex objFunc polyConstraints
+  print halfspacesMatrix
+  print polyConstraints
+  print maybeResult
   return $ case maybeResult of
     Just (Result var varLitMap) -> 
       map fromRational 
@@ -83,5 +86,5 @@ iPoint halfspacesMatrix = do
   where
     polyConstraints = inequalities halfspacesMatrix
     objFunc = Max {
-        objective = DM.singleton 1 1
+        objective = DM.singleton (length $ halfspacesMatrix !! 0) 1
       } 

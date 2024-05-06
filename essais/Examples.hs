@@ -4,13 +4,19 @@ import Data.Ratio           ( (%) )
 import Data.VectorSpace     ( AdditiveGroup((^-^)), VectorSpace((*^)) )
 import Geometry.VertexEnum
 
-testSmall :: [Constraint]
+testSmall :: [Constraint Rational]
 testSmall = [ x .<= 1, x .>= 0, y .<= 1]
   where
     x = newVar 1
     y = newVar 2
 
-rggConstraints :: [Constraint]
+testSmall' :: [Constraint Rational]
+testSmall' = [ x .<= (-1), x .>= (-2), y .<= (-1)]
+  where
+    x = newVar 1
+    y = newVar 2
+
+rggConstraints :: [Constraint Rational]
 rggConstraints =
   [ x .>= (-5)
   , x .<=  4
@@ -23,7 +29,7 @@ rggConstraints =
     y = newVar 2
     z = newVar 3
 
-region3D :: [Constraint]
+region3D :: [Constraint Rational]
 region3D =
   [ x .>=  0 -- shortcut for x .>=. cst 0
   , x .<=  3
@@ -36,7 +42,7 @@ region3D =
     y = newVar 2
     z = newVar 3
 
-cubeConstraints :: [Constraint]
+cubeConstraints :: [Constraint Rational]
 cubeConstraints =
   [ x .<= 1
   , x .>= (-1)
