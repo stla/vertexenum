@@ -55,7 +55,7 @@ type VarIndex = Int
 newVar :: Num a => VarIndex -> Var a
 newVar i = if i >= 0
             then LinearCombination (IM.singleton i 1)
-            else error "negative index"
+            else error "newVar: negative index"
 
 -- | linear combination from list of terms
 linearCombination :: Num a => [(a, Var a)] -> LinearCombination a

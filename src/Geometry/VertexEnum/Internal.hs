@@ -3,22 +3,29 @@ module Geometry.VertexEnum.Internal
   , varsOfConstraint
   , iPoint )
   where
+import           Prelude                hiding         ( EQ )
+import           Control.Monad.Logger                  (
+                                                         runStdoutLoggingT
+                                                       , filterLogger
+                                                       )
 import           Data.IntMap.Strict                    ( IntMap, mergeWithKey )
 import qualified Data.IntMap.Strict                    as IM
+import           Data.Map.Strict                       ( Map )
+import qualified Data.Map.Strict                       as DM
+import           Data.Maybe                            ( fromJust )
 import           Data.List                             ( nub, union )
+import           Data.List.Extra                       ( unsnoc )
 import           Geometry.VertexEnum.Constraint        ( Constraint (..), Sense (..) )
 import           Geometry.VertexEnum.LinearCombination ( LinearCombination (..), VarIndex )
-import           Numeric.LinearProgramming             ( simplex,
-                                                         Bound(Free, (:<=:)),
-                                                         Constraints(Dense),
-                                                         Optimization(Maximize),
-                                                         Solution(
-                                                          Undefined
-                                                        , Feasible
-                                                        , Infeasible
-                                                        , NoFeasible
-                                                        , Optimal
-                                                        , Unbounded) )
+import           Linear.Simplex.Solver.TwoPhase        (
+                                                         twoPhaseSimplex
+                                                       )
+import           Linear.Simplex.Types                  (
+                                                         Result ( .. )
+                                                       , PolyConstraint ( .. )
+                                                       , ObjectiveFunction ( .. )
+                                                       )
+
 
 normalizeLinearCombination :: 
   Num a => [VarIndex] -> LinearCombination a -> IntMap a
@@ -32,7 +39,7 @@ varsOfConstraint :: Constraint a -> [VarIndex]
 varsOfConstraint (Constraint lhs _ rhs) =
   varsOfLinearCombo lhs `union` varsOfLinearCombo rhs
 
-normalizeConstraint :: Real a => [VarIndex] -> Constraint a -> [Double]
+normalizeConstraint :: Real a => [VarIndex] -> Constraint a -> [a]
 normalizeConstraint vars (Constraint lhs sense rhs) =
   if sense == Lt
     then xs ++ [x]
@@ -41,46 +48,40 @@ normalizeConstraint vars (Constraint lhs sense rhs) =
     lhs' = normalizeLinearCombination vars lhs
     rhs' = normalizeLinearCombination vars rhs
     coefs = IM.elems $ mergeWithKey (\_ a b -> Just (a-b)) id id lhs' rhs'
-    coefs' :: [Double]
-    coefs' = map realToFrac coefs
     (x, xs) = case coefs' of
-      (xx:xxs)  -> (xx, xxs)
-      [] -> (0, [])
-  -- let (x:xs) = map realToFrac $
-  --              IM.elems $ mergeWithKey (\_ a b -> Just (a-b)) id id lhs' rhs'
-  -- in
-  -- if sense == Lt
-  --   then xs ++ [x]
-  --   else map negate xs ++ [-x]
-  -- where lhs' = normalizeLinearCombination vars lhs
-  --       rhs' = normalizeLinearCombination vars rhs
+      (xx:xxs) -> (xx, xxs)
+      []       -> (0, [])
 
-normalizeConstraints :: Real a => [Constraint a] -> [[Double]] -- for qhalf
+normalizeConstraints :: Real a => [Constraint a] -> [[a]]
 normalizeConstraints constraints = 
   map (normalizeConstraint vars) constraints
   where
     vars = nub $ concatMap varsOfConstraint constraints
 
-inequality :: [Double] -> Bound [Double]
-inequality row = (coeffs ++ [1.0]) :<=: bound
+inequality :: [Rational] -> PolyConstraint
+inequality row = 
+  LEQ { 
+        lhs = DM.fromList (zip [1 ..] (1 : coeffs)), rhs = -bound 
+      } 
   where
-    coeffs = init row
-    bound = -(last row)
+    (coeffs, bound) = fromJust $ unsnoc row
 
-inequalities :: [[Double]] -> Constraints
-inequalities normConstraints = Dense (map inequality normConstraints)
+inequalities :: [[Rational]] -> [PolyConstraint]
+inequalities normConstraints = map inequality normConstraints
 
-iPoint :: [[Double]] -> [Double]
-iPoint halfspacesMatrix = case solution of
-  Optimal (_, point) -> init point
-  Undefined          -> error "Failed to find interior point (undefined)."
-  Feasible (_, _)    -> error "Failed to find interior point (feasible)."
-  Infeasible (_, _)  -> error "Failed to find interior point (infeasible)."
-  NoFeasible         -> error "Failed to find interior point (no feasible)."
-  Unbounded          -> error "Failed to find interior point (unbounded)."  
+iPoint :: [[Rational]] -> IO [Double]
+iPoint halfspacesMatrix = do
+  maybeResult <- runStdoutLoggingT $ filterLogger (\_ _ -> False) $ 
+                  twoPhaseSimplex objFunc polyConstraints
+  return $ case maybeResult of
+    Just (Result var varLitMap) -> 
+      map fromRational 
+        (
+          DM.elems (DM.delete 1 $ DM.delete var varLitMap) 
+        )
+    Nothing -> error "failed to find an interior point."
   where
-    constraints' = inequalities halfspacesMatrix
-    n = length (head halfspacesMatrix)
-    objective = Maximize (replicate (n-1) 0 ++ [1])
-    bounds = map Free [1 .. (n-1)]
-    solution = simplex objective constraints' bounds
+    polyConstraints = inequalities halfspacesMatrix
+    objFunc = Max {
+        objective = DM.singleton 1 1
+      } 

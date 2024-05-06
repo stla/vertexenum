@@ -73,7 +73,7 @@ checkConstraints constraints point =
     then 
       zip differences (map (>= 0) differences)
     else 
-      error "The length of the point does not match the number of variables."
+      error "checkConstraints: the length of the point does not match the number of variables."
   where
     halfspacesMatrix = normalizeConstraints constraints
     nvars = length (head halfspacesMatrix)
