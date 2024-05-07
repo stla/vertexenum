@@ -5,7 +5,7 @@ import Geometry.VertexEnum  ( (.<=), (.>=), Constraint, newVar
 import Test.Tasty           ( defaultMain, testGroup )
 import Test.Tasty.HUnit     ( testCase, assertEqual, assertBool )
 
-cubeConstraints :: [Constraint Double]
+cubeConstraints :: [Constraint Rational]
 cubeConstraints =
   [ x .<= 1
   , x .>= (-1)
@@ -27,14 +27,15 @@ main = defaultMain $
       let check = checkConstraints cubeConstraints [0, 0, 0]
       assertBool "" (all snd check)
 
-  , testCase "cube vertices" $ do
+  , testCase "there are 8 cube vertices" $ do
       vertices <- vertexenum cubeConstraints (Just [0, 0, 0])
       assertEqual "" (length vertices) 8
 
-  , testCase "interior point of the cube" $ do
-      let ipoint = interiorPoint cubeConstraints
-          norm = (ipoint !! 0) * (ipoint !! 0) + 
-                 (ipoint !! 1) * (ipoint !! 1) + (ipoint !! 2) * (ipoint !! 2)
-      assertApproxZero "" 6 norm 
+  , testCase "interior point of the cube is [0, 0, 0]" $ do
+      ipoint <- interiorPoint cubeConstraints
+      -- let norm = (ipoint !! 0) * (ipoint !! 0) + 
+      --            (ipoint !! 1) * (ipoint !! 1) + (ipoint !! 2) * (ipoint !! 2)
+      -- assertApproxZero "" 6 norm 
+      assertEqual "" ipoint [0, 0, 0]
 
   ]

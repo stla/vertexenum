@@ -2,11 +2,13 @@
 {-# LANGUAGE InstanceSigs #-}
 module Geometry.VertexEnum.LinearCombination
   ( LinearCombination (..)
+  , Var
   , newVar
   , VarIndex
   , linearCombination
   , constant
   , cst
+  , toRationalLinearCombination
   )
   where
 import           Data.AdditiveGroup ( AdditiveGroup(zeroV, negateV, (^+^)) )
@@ -17,6 +19,9 @@ import           Data.Tuple         ( swap )
 import           Data.VectorSpace   ( linearCombo, VectorSpace(..) )
 
 newtype LinearCombination a = LinearCombination (IntMap a)
+
+toRationalLinearCombination :: Real a => LinearCombination a -> LinearCombination Rational
+toRationalLinearCombination (LinearCombination imap) = LinearCombination (IM.map toRational imap)
 
 instance (Eq a) => Eq (LinearCombination a) where
   (==) :: LinearCombination a -> LinearCombination a -> Bool
@@ -55,7 +60,7 @@ type VarIndex = Int
 newVar :: Num a => VarIndex -> Var a
 newVar i = if i >= 0
             then LinearCombination (IM.singleton i 1)
-            else error "negative index"
+            else error "newVar: negative index"
 
 -- | linear combination from list of terms
 linearCombination :: Num a => [(a, Var a)] -> LinearCombination a

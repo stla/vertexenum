@@ -1,16 +1,22 @@
 module Examples
   where
 import Data.Ratio           ( (%) )
-import Data.VectorSpace     ( AdditiveGroup((^-^)), VectorSpace((*^)) )
+import Data.VectorSpace     ( AdditiveGroup((^-^), (^+^)), VectorSpace((*^)) )
 import Geometry.VertexEnum
 
-testSmall :: [Constraint Double]
-testSmall = [ x .<= 1, x .>= 0, y .<= 1]
+testSmall :: [Constraint Rational]
+testSmall = [ x .<= (1), y .<= (1), x .>= 0]
+  where
+    x = newVar 1 
+    y = newVar 2 
+
+testSmall' :: [Constraint Rational]
+testSmall' = [ x .<= (-1), x .>= (-2), y .<= (-1)]
   where
     x = newVar 1
     y = newVar 2
 
-rggConstraints :: [Constraint Double]
+rggConstraints :: [Constraint Rational]
 rggConstraints =
   [ x .>= (-5)
   , x .<=  4
@@ -23,31 +29,47 @@ rggConstraints =
     y = newVar 2
     z = newVar 3
 
--- region3D :: [Constraint Double]
--- region3D =
---   [ x .>=  0 -- shortcut for x .>=. cst 0
---   , x .<=  3
---   , y .>=  0
---   , y .<=. cst 2 ^-^ (2%3)*^x
---   , z .>=  0
---   , z .<=. cst 6 ^-^ 2*^x ^-^ 3*^y ]
---   where
---     x = newVar 1
---     y = newVar 2
---     z = newVar 3
+region3D :: [Constraint Rational]
+region3D =
+  [ x .>=  0 -- shortcut for x .>=. cst 0
+  , x .<=  3
+  , y .>=  0
+  , y .<=. cst 2 ^-^ (2%3)*^x
+  , z .>=  0
+  , z .<=. cst 6 ^-^ 2*^x ^-^ 3*^y ]
+  where
+    x = newVar 1
+    y = newVar 2
+    z = newVar 3
 
-cubeConstraints :: [Constraint Double]
-cubeConstraints =
-  [ x .<= 1
-  , x .>= (-1)
+cube :: [Constraint Rational]
+cube =
+  [ x .<= (-1)
+  , x .>= (-2)
   , y .<= 1
   , y .>= (-1)
   , z .<= 1
   , z .>= (-1) ]
   where
-    x = newVar 1
-    y = newVar 2
-    z = newVar 3
+    x = newVar 1 -- ^-^ cst (1)
+    y = newVar 2 -- ^-^ cst (1)
+    z = newVar 3 -- ^-^ cst (1)
+
+eps :: Rational
+eps = 1%100
+
+cubeConstraints :: [Constraint Rational]
+cubeConstraints =
+  [ x .<= 1 + eps
+  , x .>= (-1)
+  , y .<= 1 + eps
+  , y .>= (-1)
+  , z .<= 1 + eps
+  , z .>= (-1) ]
+  where
+    x = newVar 1 -- ^-^ cst (1)
+    y = newVar 2 -- ^-^ cst (1)
+    z = newVar 3 -- ^-^ cst (1)
 
 cubeConstraints' :: [[Double]]
 cubeConstraints' = [[ 1, 0, 0,-1]

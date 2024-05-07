@@ -2,12 +2,13 @@
 module Geometry.VertexEnum.Constraint
   ( Sense (..)
   , Constraint (..)
+  , toRationalConstraint
   , (.>=.)
   , (.<=.)
   , (.>=)
   , (.<=) )
   where
-import Geometry.VertexEnum.LinearCombination ( LinearCombination, constant )
+import Geometry.VertexEnum.LinearCombination ( LinearCombination, constant, toRationalLinearCombination )
 
 data Sense = Gt | Lt
   deriving Eq
@@ -18,6 +19,10 @@ instance Show Sense where
   show Lt = "<="
 
 data Constraint a = Constraint (LinearCombination a) Sense (LinearCombination a)
+
+toRationalConstraint :: Real a => Constraint a -> Constraint Rational
+toRationalConstraint (Constraint lhs sense rhs) = 
+  Constraint (toRationalLinearCombination lhs) sense (toRationalLinearCombination rhs)
 
 instance Show a => Show (Constraint a) where 
   show :: Constraint a -> String
@@ -35,4 +40,4 @@ instance Show a => Show (Constraint a) where
 (.<=) :: LinearCombination a -> a -> Constraint a
 (.<=) lhs x = (.<=.) lhs (constant x)
 
-infix 4 .<=., .>=.
+infix 4 .<=., .>=., .<=, .>=
