@@ -2,6 +2,7 @@ module Geometry.VertexEnum.Internal
   ( normalizeConstraints
   , varsOfConstraint
   , feasiblePoint
+  , findSigns
   , makeFeasibleSystem
   , optimize
   , iPoint )
@@ -15,7 +16,7 @@ import           Data.IntMap.Strict                    ( IntMap, mergeWithKey )
 import qualified Data.IntMap.Strict                    as IM
 import           Data.Map.Strict                       ( Map )
 import qualified Data.Map.Strict                       as DM
-import           Data.Maybe                            ( fromJust )
+import           Data.Maybe                            ( fromJust, isJust )
 import           Data.List                             ( nub, union )
 import           Data.List.Extra                       ( unsnoc )
 import           Geometry.VertexEnum.Constraint        ( Constraint (..), Sense (..) )
@@ -69,7 +70,7 @@ normalizeConstraints constraints =
 inequality :: [Bool] -> [Rational] -> PolyConstraint
 inequality toNegate row = 
   LEQ { 
-        lhs = DM.fromList (zip [0 ..] ([bound, 1] ++ coeffs)), rhs = 0 
+        lhs = DM.filter (/= 0) (DM.fromList (zip [1 ..] (1 : coeffs))), rhs = -bound
       }
   where
     (coeffs0, bound) = fromJust $ unsnoc row
@@ -77,10 +78,13 @@ inequality toNegate row =
 
 inequalities :: [[Rational]] -> [Bool] -> [PolyConstraint]
 inequalities normConstraints toNegate = 
-  EQ { 
-        lhs = DM.singleton 0 1, rhs = 1
-      } 
-  : map (inequality toNegate) normConstraints
+  -- EQ { 
+  --       lhs = DM.singleton 0 1, rhs = 1
+  --     }
+  [LEQ { lhs = DM.fromList [(1, 1), (i, -1)], rhs = 0 } | i <- [2 .. nvars + 1]]
+   ++ map (inequality toNegate) normConstraints
+  where 
+    nvars = length toNegate
 
 iPoint :: [[Rational]] -> [Bool] -> IO [Double]
 iPoint halfspacesMatrix toNegate = do
@@ -96,28 +100,51 @@ iPoint halfspacesMatrix toNegate = do
     Just (Result var varLitMap) -> 
       map fromRational 
         (
-          DM.elems (DM.delete 1 $ DM.delete var varLitMap) 
+          map (negateIf) (zip toNegate (DM.elems (DM.delete 1 $ DM.delete var varLitMap))) 
         )
     Nothing -> error "failed to find an interior point."
   where
+    negateIf (test, x) = if test then -x else x
     polyConstraints = inequalities halfspacesMatrix toNegate
     objFunc = Max {
         objective = DM.singleton 1 1
       } 
 
-feasiblePoint :: [Constraint Rational] -> IO (Maybe FeasibleSystem)
-feasiblePoint constraints = do
-  runStdoutLoggingT $ filterLogger (\_ _ -> False) $ 
+feasiblePoint :: [Constraint Rational] -> [Bool] -> IO Bool
+feasiblePoint constraints toNegate = do
+  maybeFS <- runStdoutLoggingT $ filterLogger (\_ _ -> False) $ 
                   findFeasibleSolution polyConstraints
+  return $ isJust maybeFS
   where
     halfspacesMatrix = normalizeConstraints constraints
     polyConstraints = map ineq halfspacesMatrix
     ineq row = 
       LEQ { 
-            lhs = DM.fromList (zip [1 ..] coeffs), rhs = -bound 
+            lhs = DM.fromList (zip [1 ..] coeffs'), rhs = -bound 
           } 
       where
         (coeffs, bound) = fromJust $ unsnoc row
+        coeffs' = [if toNegate !! i then -coeffs !! i else coeffs !! i | i <- [0 .. length coeffs - 1]]
+
+findSigns :: [Constraint Rational] -> IO [Bool]
+findSigns constraints = do 
+  go 0
+  where
+    halfspacesMatrix = normalizeConstraints constraints
+    nvars = length (halfspacesMatrix !! 0) - 1
+    combinations = sequence $ replicate nvars [False, True]
+    ncombinations = length combinations
+    go i 
+      | i == ncombinations = error "XXXXXXXXXXX"
+      | otherwise = do 
+          let combo = combinations !! i
+          test <- feasiblePoint constraints combo
+          if test 
+            then do
+              return $ combo
+            else do
+              go (i+1)
+
 
 makeFeasibleSystem :: [Constraint Rational] -> [Bool] -> FeasibleSystem
 makeFeasibleSystem constraints toNegate = FeasibleSystem dico slackvars [] ovar

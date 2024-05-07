@@ -11,7 +11,7 @@ import           Foreign.Marshal.Array           ( peekArray, pokeArray )
 import           Foreign.Storable                ( peek, sizeOf )
 import           Geometry.VertexEnum.CVertexEnum ( c_intersections )
 import           Geometry.VertexEnum.Constraint  ( Constraint )
-import           Geometry.VertexEnum.Internal    ( iPoint, normalizeConstraints )
+import           Geometry.VertexEnum.Internal    ( iPoint, normalizeConstraints, findSigns )
 
 hsintersections :: [[Double]]     -- halfspaces
                  -> [Double]      -- interior point
@@ -88,9 +88,10 @@ checkConstraints constraints point =
     differences = map (checkRow point) halfspacesMatrix
 
 -- | Returns a point fulfilling a list of constraints
-interiorPoint :: Real a => [Constraint a] -> [Bool] -> IO [Double]
-interiorPoint constraints toNegate = do 
+interiorPoint :: [Constraint Rational] -> IO [Double]
+interiorPoint constraints = do 
   let
     halfspacesMatrix = 
       map (map toRational) (normalizeConstraints constraints)
-  iPoint halfspacesMatrix toNegate
+  signs <- findSigns constraints
+  iPoint halfspacesMatrix signs
