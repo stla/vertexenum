@@ -83,19 +83,14 @@ iPoint :: [[Rational]] -> [Bool] -> IO [Double]
 iPoint halfspacesMatrix toNegate = do
   maybeResult <- runStdoutLoggingT $ filterLogger (\_ _ -> False) $ 
                   twoPhaseSimplex objFunc polyConstraints
-  fs <- runStdoutLoggingT $ filterLogger (\_ _ -> False) $ 
-                findFeasibleSolution polyConstraints
-  print halfspacesMatrix
-  print polyConstraints
-  print maybeResult
-  print fs
   return $ case maybeResult of
     Just (Result var varLitMap) -> 
       map fromRational 
         (
-          map (negateIf) (zip toNegate (DM.elems (DM.delete 1 $ DM.delete var varLitMap))) 
+          map negateIf 
+            (zip toNegate (DM.elems (DM.delete 1 $ DM.delete var varLitMap)))
         )
-    Nothing -> error "failed to find an interior point."
+    Nothing -> error "iPoint: should not happend."
   where
     negateIf (test, x) = if test then -x else x
     polyConstraints = inequalities halfspacesMatrix toNegate
@@ -116,7 +111,8 @@ feasiblePoint halfspacesMatrix toNegate = do
           } 
       where
         (coeffs, bound) = fromJust $ unsnoc row
-        coeffs' = [if toNegate !! i then -coeffs !! i else coeffs !! i | i <- [0 .. length coeffs - 1]]
+        negateIf (test, x) = if test then -x else x
+        coeffs' = map negateIf (zip toNegate coeffs)
 
 findSigns :: [[Rational]] -> IO [Bool]
 findSigns halfspacesMatrix = do 
@@ -126,7 +122,7 @@ findSigns halfspacesMatrix = do
     combinations = sequence $ replicate nvars [False, True]
     ncombinations = length combinations
     go i 
-      | i == ncombinations = error "XXXXXXXXXXX"
+      | i == ncombinations = error "no feasible point"
       | otherwise = do 
           let combo = combinations !! i
           test <- feasiblePoint halfspacesMatrix combo
