@@ -24,3 +24,4 @@ import Geometry.VertexEnum.LinearCombination as X ( VarIndex
 import Geometry.VertexEnum.VertexEnum        as X ( vertexenum 
                                                   , checkConstraints
                                                   , interiorPoint )
+import Geometry.VertexEnum.Internal        as X ( feasiblePoint, makeFeasibleSystem, optimize, iPoint )

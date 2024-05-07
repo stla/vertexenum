@@ -1,6 +1,9 @@
 module Geometry.VertexEnum.Internal
   ( normalizeConstraints
   , varsOfConstraint
+  , feasiblePoint
+  , makeFeasibleSystem
+  , optimize
   , iPoint )
   where
 import           Prelude                hiding         ( EQ )
@@ -19,11 +22,16 @@ import           Geometry.VertexEnum.Constraint        ( Constraint (..), Sense 
 import           Geometry.VertexEnum.LinearCombination ( LinearCombination (..), VarIndex )
 import           Linear.Simplex.Solver.TwoPhase        (
                                                          twoPhaseSimplex
+                                                       , findFeasibleSolution
+                                                       , optimizeFeasibleSystem
                                                        )
 import           Linear.Simplex.Types                  (
                                                          Result ( .. )
                                                        , PolyConstraint ( .. )
                                                        , ObjectiveFunction ( .. )
+                                                       , FeasibleSystem ( .. )
+                                                       , Dict
+                                                       , DictValue ( .. )
                                                        )
 
 
@@ -58,24 +66,32 @@ normalizeConstraints constraints =
   where
     vars = nub $ concatMap varsOfConstraint constraints
 
-inequality :: [Rational] -> PolyConstraint
-inequality row = 
+inequality :: [Bool] -> [Rational] -> PolyConstraint
+inequality toNegate row = 
   LEQ { 
-        lhs = DM.fromList (zip [1 ..] (coeffs ++ [1])), rhs = -bound 
-      } 
+        lhs = DM.fromList (zip [0 ..] ([bound, 1] ++ coeffs)), rhs = 0 
+      }
   where
-    (coeffs, bound) = fromJust $ unsnoc row
+    (coeffs0, bound) = fromJust $ unsnoc row
+    coeffs = [if toNegate !! i then -coeffs0 !! i else coeffs0 !! i | i <- [0 .. length coeffs0 - 1]]
 
-inequalities :: [[Rational]] -> [PolyConstraint]
-inequalities normConstraints = map inequality normConstraints
+inequalities :: [[Rational]] -> [Bool] -> [PolyConstraint]
+inequalities normConstraints toNegate = 
+  EQ { 
+        lhs = DM.singleton 0 1, rhs = 1
+      } 
+  : map (inequality toNegate) normConstraints
 
-iPoint :: [[Rational]] -> IO [Double]
-iPoint halfspacesMatrix = do
+iPoint :: [[Rational]] -> [Bool] -> IO [Double]
+iPoint halfspacesMatrix toNegate = do
   maybeResult <- runStdoutLoggingT $ filterLogger (\_ _ -> False) $ 
                   twoPhaseSimplex objFunc polyConstraints
+  fs <- runStdoutLoggingT $ filterLogger (\_ _ -> False) $ 
+                findFeasibleSolution polyConstraints
   print halfspacesMatrix
   print polyConstraints
   print maybeResult
+  print fs
   return $ case maybeResult of
     Just (Result var varLitMap) -> 
       map fromRational 
@@ -84,7 +100,50 @@ iPoint halfspacesMatrix = do
         )
     Nothing -> error "failed to find an interior point."
   where
-    polyConstraints = inequalities halfspacesMatrix
+    polyConstraints = inequalities halfspacesMatrix toNegate
     objFunc = Max {
-        objective = DM.singleton (length $ halfspacesMatrix !! 0) 1
+        objective = DM.singleton 1 1
       } 
+
+feasiblePoint :: [Constraint Rational] -> IO (Maybe FeasibleSystem)
+feasiblePoint constraints = do
+  runStdoutLoggingT $ filterLogger (\_ _ -> False) $ 
+                  findFeasibleSolution polyConstraints
+  where
+    halfspacesMatrix = normalizeConstraints constraints
+    polyConstraints = map ineq halfspacesMatrix
+    ineq row = 
+      LEQ { 
+            lhs = DM.fromList (zip [1 ..] coeffs), rhs = -bound 
+          } 
+      where
+        (coeffs, bound) = fromJust $ unsnoc row
+
+makeFeasibleSystem :: [Constraint Rational] -> [Bool] -> FeasibleSystem
+makeFeasibleSystem constraints toNegate = FeasibleSystem dico slackvars [] ovar
+  where
+    halfspacesMatrix = normalizeConstraints constraints
+    nconstraints = length halfspacesMatrix
+    nvars = length (halfspacesMatrix !! 0) 
+    d (i, row) = (i, dictvalue)
+      where 
+        row' = map negate (1 : row)
+        coeffs0 = init row'
+        coeffs = [if toNegate !! i then -coeffs0 !! i else coeffs0 !! i | i <- [0 .. length coeffs0 - 1]]
+        bound = last row'
+        dictvalue = DictValue {varMapSum = DM.fromList (zip [1..] coeffs), constant = bound}
+    dico = DM.fromList (map d (zip [nvars+1 ..] halfspacesMatrix))
+    slackvars = [nconstraints + nvars, nconstraints+nvars-1 .. nvars+1]
+    ovar = nconstraints + nvars + 1
+
+optimize :: [Constraint Rational] -> [Bool] -> IO (Maybe Result)
+optimize constraints toNegate = do
+  runStdoutLoggingT $ filterLogger (\_ _ -> False) $ 
+                  optimizeFeasibleSystem objFunc fs
+  where
+    fs = makeFeasibleSystem constraints toNegate
+    objFunc = Max {
+        objective = DM.singleton 1 1
+      } 
+
+

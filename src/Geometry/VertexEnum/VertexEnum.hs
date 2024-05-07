@@ -65,7 +65,7 @@ vertexenum constraints point = do
     else do
       let halfspacesMatrix' =
             map (map toRational) (normalizeConstraints constraints)
-      ipoint <- iPoint halfspacesMatrix'
+      ipoint <- iPoint halfspacesMatrix' [False]
       hsintersections halfspacesMatrix ipoint False
 
 -- | Check whether a point fulfills some constraints; returns the 
@@ -88,9 +88,9 @@ checkConstraints constraints point =
     differences = map (checkRow point) halfspacesMatrix
 
 -- | Returns a point fulfilling a list of constraints
-interiorPoint :: Real a => [Constraint a] -> IO [Double]
-interiorPoint constraints = do 
+interiorPoint :: Real a => [Constraint a] -> [Bool] -> IO [Double]
+interiorPoint constraints toNegate = do 
   let
     halfspacesMatrix = 
       map (map toRational) (normalizeConstraints constraints)
-  iPoint halfspacesMatrix
+  iPoint halfspacesMatrix toNegate
