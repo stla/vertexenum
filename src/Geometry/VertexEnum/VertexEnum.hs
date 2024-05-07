@@ -21,11 +21,11 @@ hsintersections halfspaces ipoint stdout = do
   let n     = length halfspaces
       dim   = length ipoint
   unless (all ((== dim+1) . length) halfspaces) $
-    error "the points must have the same dimension"
+    error "the length of the point does not match the number of variables."
   when (dim < 2) $
-    error "dimension must be at least 2"
+    error "dimension must be at least 2."
   when (n <= dim) $
-    error "insufficient number of halfspaces"
+    error "insufficient number of halfspaces."
   hsPtr <- mallocBytes (n * (dim+1) * sizeOf (undefined :: CDouble))
   pokeArray hsPtr (concatMap (map realToFrac) halfspaces)
   ipointPtr <- mallocBytes (dim * sizeOf (undefined :: CDouble))
@@ -54,7 +54,7 @@ hsintersections halfspaces ipoint stdout = do
 
 -- | Vertex enumeration
 vertexenum :: Real a => [Constraint a]   -- ^ list of inequalities
-           -> Maybe [Double] -- ^ point in the interior of the polytope
+           -> Maybe [Double] -- ^ point in the interior of the polytope; @Nothing@ for automatic point
            -> IO [[Double]]
 vertexenum constraints point = do
   let halfspacesMatrix = 
@@ -63,7 +63,7 @@ vertexenum constraints point = do
     then do
       hsintersections halfspacesMatrix (fromJust point) False
     else do
-      ipoint <- interiorPoint constraints
+      ipoint <- interiorPoint constraints 
       hsintersections halfspacesMatrix ipoint False
 
 -- | Check whether a point fulfills some constraints; returns the 

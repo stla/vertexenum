@@ -5,7 +5,7 @@ import Data.VectorSpace     ( AdditiveGroup((^-^), (^+^)), VectorSpace((*^)) )
 import Geometry.VertexEnum
 
 testSmall :: [Constraint Rational]
-testSmall = [ x .<= (1), y .<= (1), x .>= 0, y .>= 0]
+testSmall = [ x .<= (1), y .<= (1), x .>= 0]
   where
     x = newVar 1 
     y = newVar 2 
@@ -54,6 +54,9 @@ cube =
     x = newVar 1 -- ^-^ cst (1)
     y = newVar 2 -- ^-^ cst (1)
     z = newVar 3 -- ^-^ cst (1)
+
+eps :: Rational
+eps = 1%100
 
 cubeConstraints :: [Constraint Rational]
 cubeConstraints =

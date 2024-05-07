@@ -65,7 +65,7 @@ normalizeConstraints constraints =
 inequality :: [Bool] -> [Rational] -> PolyConstraint
 inequality toNegate row = 
   LEQ { 
-        lhs = DM.fromList (zip [1 ..] (1 : coeffs')), rhs = -bound
+        lhs = DM.fromList (zip [0 ..] (1 : coeffs')), rhs = -bound
       }
   where
     negateIf test x = if test then -x else x
@@ -75,28 +75,36 @@ inequality toNegate row =
 inequalities :: [[Rational]] -> [Bool] -> [PolyConstraint]
 inequalities normConstraints toNegate = 
   simplifySystem $ 
-    [LEQ { lhs = DM.fromList [(1, 1), (i, -1)], rhs = 0 } | i <- [2 .. nvars + 1]]
-     ++ map (inequality toNegate) normConstraints
-  where 
-    nvars = length toNegate
+--    [ LEQ { lhs = DM.fromList [(0, -1), (i, sign (toNegate !! (i-1)))], rhs = 0 } | i <- [1 .. nvars] ]
+    map (inequality toNegate) normConstraints
+  -- where 
+  --   nvars = length toNegate
+  --   sign test = if test then 1 else -1 
+
 
 iPoint :: [[Rational]] -> [Bool] -> IO [Double]
 iPoint halfspacesMatrix toNegate = do
-  maybeResult <- runStdoutLoggingT $ filterLogger (\_ _ -> False) $ 
+  maybeResult <- runStdoutLoggingT $ filterLogger (\_ _ -> True) $ 
                   twoPhaseSimplex objFunc polyConstraints
+  print maybeResult
+  print toNegate
   return $ case maybeResult of
     Just (Result var varLitMap) -> 
+      let sol = DM.delete 0 $ DM.delete var varLitMap
+          nvars = length toNegate
+          sol' = DM.union sol (DM.fromList (zip [1 .. nvars] (repeat 0)))
+      in 
       map fromRational 
         (
           zipWith negateIf 
-            toNegate (DM.elems (DM.delete 1 $ DM.delete var varLitMap))
+            toNegate (DM.elems sol')
         )
     Nothing -> error "iPoint: should not happen."
   where
     negateIf test x = if test then -x else x
     polyConstraints = inequalities halfspacesMatrix toNegate
     objFunc = Max {
-        objective = DM.singleton 1 1
+        objective = DM.singleton 0 1
       } 
 
 feasiblePoint :: [[Rational]] -> [Bool] -> IO Bool
@@ -123,7 +131,7 @@ findSigns halfspacesMatrix = do
     combinations = sequence $ replicate nvars [False, True]
     ncombinations = length combinations
     go i 
-      | i == ncombinations = error "no feasible point"
+      | i == ncombinations = error "there is no feasible point;"
       | otherwise = do 
           let combo = combinations !! i
           test <- feasiblePoint halfspacesMatrix combo
