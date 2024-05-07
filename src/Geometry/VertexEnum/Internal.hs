@@ -81,13 +81,13 @@ inequalities normConstraints toNegate =
   --   nvars = length toNegate
   --   sign test = if test then 1 else -1 
 
-
+-- iPoint does not necessarily return the optimal interior point, because 
+-- this point possibly corresponds to another [Bool] combination; it just 
+-- returns a feasible point
 iPoint :: [[Rational]] -> [Bool] -> IO [Double]
 iPoint halfspacesMatrix toNegate = do
-  maybeResult <- runStdoutLoggingT $ filterLogger (\_ _ -> True) $ 
+  maybeResult <- runStdoutLoggingT $ filterLogger (\_ _ -> False) $ 
                   twoPhaseSimplex objFunc polyConstraints
-  print maybeResult
-  print toNegate
   return $ case maybeResult of
     Just (Result var varLitMap) -> 
       let sol = DM.delete 0 $ DM.delete var varLitMap
@@ -96,8 +96,7 @@ iPoint halfspacesMatrix toNegate = do
       in 
       map fromRational 
         (
-          zipWith negateIf 
-            toNegate (DM.elems sol')
+          zipWith negateIf toNegate (DM.elems sol')
         )
     Nothing -> error "iPoint: should not happen."
   where

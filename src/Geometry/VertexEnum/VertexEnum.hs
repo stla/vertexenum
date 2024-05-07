@@ -61,6 +61,9 @@ vertexenum constraints point = do
         map (map realToFrac) (normalizeConstraints constraints)
   if isJust point
     then do
+      let check = checkConstraints constraints (fromJust point)
+      when (not $ all snd check) $
+        error "vertexenum: the provided point does not fulfill the constraints"
       hsintersections halfspacesMatrix (fromJust point) False
     else do
       ipoint <- interiorPoint constraints 

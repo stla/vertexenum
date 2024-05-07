@@ -14,9 +14,8 @@ jobs:
 
         resolver:
           - nightly
-          - lts       # ghc-9.4 (as of writing)
-          - lts-21.20 # ghc 9.4.7
-          - lts-21.11 # ghc-9.4.6
+          - lts       # ghc-9.6 (as of writing)
+          - lts-21.25 # ghc 9.4
           - lts-20.26 # ghc-9.2
           - lts-19.33 # ghc-9.0
           - lts-18.9  # ghc-8.10
@@ -28,9 +27,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Install system dependencies
-        run: |
-          sudo apt-get install --yes glpk-utils libglpk-dev
+      # - name: Install system dependencies
+      #   run: |
+      #     sudo apt-get install --yes glpk-utils libglpk-dev
 
       - uses: freckle/stack-action@v3
 

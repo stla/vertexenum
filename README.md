@@ -4,13 +4,9 @@
 [![Stack](https://github.com/stla/vertexenum/actions/workflows/Stack.yml/badge.svg)](https://github.com/stla/vertexenum/actions/workflows/Stack.yml)
 <!-- badges: end -->
 
-*Get the vertices of an intersection of halfspaces.*
+***Get the vertices of an intersection of halfspaces.***
 
 ____
-
-This package depends on the packages **hmatrix** and **hmatrix-glpk**; follow 
-[this link](https://github.com/haskell-numerics/hmatrix/blob/master/INSTALL.md) 
-for installation instructions.
 
 Consider the following system of linear inequalities:
 
@@ -21,12 +17,14 @@ a convex polytope. The `vertexenum` function can calculate the vertices of this
 polytope:
 
 ```haskell
-import Data.VectorSpace     ( AdditiveGroup((^+^), (^-^))
-                            , VectorSpace((*^)) )
+import Data.VectorSpace     ( 
+                              AdditiveGroup( (^+^), (^-^) )
+                            , VectorSpace( (*^) ) 
+                            )
 import Geometry.VertexEnum
 
-constraints :: [Constraint Double]
-constraints =
+inequalities :: [Constraint Rational]
+inequalities =
   [ x .>= (-5)         -- shortcut for `x .>=. cst (-5)`
   , x .<=  4
   , y .>= (-5)

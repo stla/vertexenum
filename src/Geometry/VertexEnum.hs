@@ -17,6 +17,7 @@ import Geometry.VertexEnum.Constraint        as X ( Constraint (..)
                                                   )
 import Geometry.VertexEnum.LinearCombination as X ( VarIndex
                                                   , LinearCombination (..)
+                                                  , Var 
                                                   , newVar
                                                   , linearCombination
                                                   , constant

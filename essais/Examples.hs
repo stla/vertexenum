@@ -60,11 +60,11 @@ eps = 1%100
 
 cubeConstraints :: [Constraint Rational]
 cubeConstraints =
-  [ x .<= 1
+  [ x .<= 1 + eps
   , x .>= (-1)
-  , y .<= 1
+  , y .<= 1 + eps
   , y .>= (-1)
-  , z .<= 1
+  , z .<= 1 + eps
   , z .>= (-1) ]
   where
     x = newVar 1 -- ^-^ cst (1)

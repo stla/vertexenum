@@ -40,4 +40,4 @@ instance Show a => Show (Constraint a) where
 (.<=) :: LinearCombination a -> a -> Constraint a
 (.<=) lhs x = (.<=.) lhs (constant x)
 
-infix 4 .<=., .>=.
+infix 4 .<=., .>=., .<=, .>=

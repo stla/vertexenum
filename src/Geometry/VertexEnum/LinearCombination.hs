@@ -2,6 +2,7 @@
 {-# LANGUAGE InstanceSigs #-}
 module Geometry.VertexEnum.LinearCombination
   ( LinearCombination (..)
+  , Var
   , newVar
   , VarIndex
   , linearCombination
