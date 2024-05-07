@@ -27,7 +27,9 @@ import           Linear.Simplex.Types                  (
                                                        , PolyConstraint ( .. )
                                                        , ObjectiveFunction ( .. )
                                                        )
-
+import           Linear.Simplex.Util                   (
+                                                         simplifySystem
+                                                       )
 
 normalizeLinearCombination :: 
   Num a => [VarIndex] -> LinearCombination a -> IntMap a
@@ -63,19 +65,18 @@ normalizeConstraints constraints =
 inequality :: [Bool] -> [Rational] -> PolyConstraint
 inequality toNegate row = 
   LEQ { 
-        lhs = DM.filter (/= 0) (DM.fromList (zip [1 ..] (1 : coeffs))), rhs = -bound
+        lhs = DM.fromList (zip [1 ..] (1 : coeffs')), rhs = -bound
       }
   where
-    (coeffs0, bound) = fromJust $ unsnoc row
-    coeffs = [if toNegate !! i then -coeffs0 !! i else coeffs0 !! i | i <- [0 .. length coeffs0 - 1]]
+    negateIf test x = if test then -x else x
+    (coeffs, bound) = fromJust $ unsnoc row
+    coeffs' = zipWith negateIf toNegate coeffs
 
 inequalities :: [[Rational]] -> [Bool] -> [PolyConstraint]
 inequalities normConstraints toNegate = 
-  -- EQ { 
-  --       lhs = DM.singleton 0 1, rhs = 1
-  --     }
-  [LEQ { lhs = DM.fromList [(1, 1), (i, -1)], rhs = 0 } | i <- [2 .. nvars + 1]]
-   ++ map (inequality toNegate) normConstraints
+  simplifySystem $ 
+    [LEQ { lhs = DM.fromList [(1, 1), (i, -1)], rhs = 0 } | i <- [2 .. nvars + 1]]
+     ++ map (inequality toNegate) normConstraints
   where 
     nvars = length toNegate
 
@@ -87,12 +88,12 @@ iPoint halfspacesMatrix toNegate = do
     Just (Result var varLitMap) -> 
       map fromRational 
         (
-          map negateIf 
-            (zip toNegate (DM.elems (DM.delete 1 $ DM.delete var varLitMap)))
+          zipWith negateIf 
+            toNegate (DM.elems (DM.delete 1 $ DM.delete var varLitMap))
         )
-    Nothing -> error "iPoint: should not happend."
+    Nothing -> error "iPoint: should not happen."
   where
-    negateIf (test, x) = if test then -x else x
+    negateIf test x = if test then -x else x
     polyConstraints = inequalities halfspacesMatrix toNegate
     objFunc = Max {
         objective = DM.singleton 1 1
@@ -104,15 +105,15 @@ feasiblePoint halfspacesMatrix toNegate = do
                   findFeasibleSolution polyConstraints
   return $ isJust maybeFS
   where
-    polyConstraints = map ineq halfspacesMatrix
+    polyConstraints = simplifySystem $ map ineq halfspacesMatrix
     ineq row = 
       LEQ { 
-            lhs = DM.fromList (zip [1 ..] coeffs'), rhs = -bound 
+            lhs = DM.fromList (zip [1 ..] coeffs'), rhs = -bound
           } 
       where
         (coeffs, bound) = fromJust $ unsnoc row
-        negateIf (test, x) = if test then -x else x
-        coeffs' = map negateIf (zip toNegate coeffs)
+        negateIf test x = if test then -x else x
+        coeffs' = zipWith negateIf toNegate coeffs
 
 findSigns :: [[Rational]] -> IO [Bool]
 findSigns halfspacesMatrix = do 
