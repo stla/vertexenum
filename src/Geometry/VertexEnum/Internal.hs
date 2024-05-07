@@ -103,13 +103,12 @@ iPoint halfspacesMatrix toNegate = do
         objective = DM.singleton 1 1
       } 
 
-feasiblePoint :: [Constraint Rational] -> [Bool] -> IO Bool
-feasiblePoint constraints toNegate = do
+feasiblePoint :: [[Rational]] -> [Bool] -> IO Bool
+feasiblePoint halfspacesMatrix toNegate = do
   maybeFS <- runStdoutLoggingT $ filterLogger (\_ _ -> False) $ 
                   findFeasibleSolution polyConstraints
   return $ isJust maybeFS
   where
-    halfspacesMatrix = normalizeConstraints constraints
     polyConstraints = map ineq halfspacesMatrix
     ineq row = 
       LEQ { 
@@ -119,11 +118,10 @@ feasiblePoint constraints toNegate = do
         (coeffs, bound) = fromJust $ unsnoc row
         coeffs' = [if toNegate !! i then -coeffs !! i else coeffs !! i | i <- [0 .. length coeffs - 1]]
 
-findSigns :: [Constraint Rational] -> IO [Bool]
-findSigns constraints = do 
+findSigns :: [[Rational]] -> IO [Bool]
+findSigns halfspacesMatrix = do 
   go 0
   where
-    halfspacesMatrix = normalizeConstraints constraints
     nvars = length (halfspacesMatrix !! 0) - 1
     combinations = sequence $ replicate nvars [False, True]
     ncombinations = length combinations
@@ -131,7 +129,7 @@ findSigns constraints = do
       | i == ncombinations = error "XXXXXXXXXXX"
       | otherwise = do 
           let combo = combinations !! i
-          test <- feasiblePoint constraints combo
+          test <- feasiblePoint halfspacesMatrix combo
           if test 
             then do
               return $ combo

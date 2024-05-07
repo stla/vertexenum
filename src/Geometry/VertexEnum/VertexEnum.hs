@@ -63,9 +63,7 @@ vertexenum constraints point = do
     then do
       hsintersections halfspacesMatrix (fromJust point) False
     else do
-      let halfspacesMatrix' =
-            map (map toRational) (normalizeConstraints constraints)
-      ipoint <- iPoint halfspacesMatrix' [False]
+      ipoint <- interiorPoint constraints
       hsintersections halfspacesMatrix ipoint False
 
 -- | Check whether a point fulfills some constraints; returns the 
@@ -93,5 +91,5 @@ interiorPoint constraints = do
   let
     constraints' = map toRationalConstraint constraints
     halfspacesMatrix = normalizeConstraints constraints'
-  signs <- findSigns constraints'
+  signs <- findSigns halfspacesMatrix 
   iPoint halfspacesMatrix signs
