@@ -3,8 +3,6 @@ module Geometry.VertexEnum.Internal
   , varsOfConstraint
   , feasiblePoint
   , findSigns
-  , makeFeasibleSystem
-  , optimize
   , iPoint )
   where
 import           Prelude                hiding         ( EQ )
@@ -14,7 +12,6 @@ import           Control.Monad.Logger                  (
                                                        )
 import           Data.IntMap.Strict                    ( IntMap, mergeWithKey )
 import qualified Data.IntMap.Strict                    as IM
-import           Data.Map.Strict                       ( Map )
 import qualified Data.Map.Strict                       as DM
 import           Data.Maybe                            ( fromJust, isJust )
 import           Data.List                             ( nub, union )
@@ -24,15 +21,11 @@ import           Geometry.VertexEnum.LinearCombination ( LinearCombination (..),
 import           Linear.Simplex.Solver.TwoPhase        (
                                                          twoPhaseSimplex
                                                        , findFeasibleSolution
-                                                       , optimizeFeasibleSystem
                                                        )
 import           Linear.Simplex.Types                  (
                                                          Result ( .. )
                                                        , PolyConstraint ( .. )
                                                        , ObjectiveFunction ( .. )
-                                                       , FeasibleSystem ( .. )
-                                                       , Dict
-                                                       , DictValue ( .. )
                                                        )
 
 
@@ -146,31 +139,31 @@ findSigns constraints = do
               go (i+1)
 
 
-makeFeasibleSystem :: [Constraint Rational] -> [Bool] -> FeasibleSystem
-makeFeasibleSystem constraints toNegate = FeasibleSystem dico slackvars [] ovar
-  where
-    halfspacesMatrix = normalizeConstraints constraints
-    nconstraints = length halfspacesMatrix
-    nvars = length (halfspacesMatrix !! 0) 
-    d (i, row) = (i, dictvalue)
-      where 
-        row' = map negate (1 : row)
-        coeffs0 = init row'
-        coeffs = [if toNegate !! i then -coeffs0 !! i else coeffs0 !! i | i <- [0 .. length coeffs0 - 1]]
-        bound = last row'
-        dictvalue = DictValue {varMapSum = DM.fromList (zip [1..] coeffs), constant = bound}
-    dico = DM.fromList (map d (zip [nvars+1 ..] halfspacesMatrix))
-    slackvars = [nconstraints + nvars, nconstraints+nvars-1 .. nvars+1]
-    ovar = nconstraints + nvars + 1
+-- makeFeasibleSystem :: [Constraint Rational] -> [Bool] -> FeasibleSystem
+-- makeFeasibleSystem constraints toNegate = FeasibleSystem dico slackvars [] ovar
+--   where
+--     halfspacesMatrix = normalizeConstraints constraints
+--     nconstraints = length halfspacesMatrix
+--     nvars = length (halfspacesMatrix !! 0) 
+--     d (i, row) = (i, dictvalue)
+--       where 
+--         row' = map negate (1 : row)
+--         coeffs0 = init row'
+--         coeffs = [if toNegate !! i then -coeffs0 !! i else coeffs0 !! i | i <- [0 .. length coeffs0 - 1]]
+--         bound = last row'
+--         dictvalue = DictValue {varMapSum = DM.fromList (zip [1..] coeffs), constant = bound}
+--     dico = DM.fromList (map d (zip [nvars+1 ..] halfspacesMatrix))
+--     slackvars = [nconstraints + nvars, nconstraints+nvars-1 .. nvars+1]
+--     ovar = nconstraints + nvars + 1
 
-optimize :: [Constraint Rational] -> [Bool] -> IO (Maybe Result)
-optimize constraints toNegate = do
-  runStdoutLoggingT $ filterLogger (\_ _ -> False) $ 
-                  optimizeFeasibleSystem objFunc fs
-  where
-    fs = makeFeasibleSystem constraints toNegate
-    objFunc = Max {
-        objective = DM.singleton 1 1
-      } 
+-- optimize :: [Constraint Rational] -> [Bool] -> IO (Maybe Result)
+-- optimize constraints toNegate = do
+--   runStdoutLoggingT $ filterLogger (\_ _ -> False) $ 
+--                   optimizeFeasibleSystem objFunc fs
+--   where
+--     fs = makeFeasibleSystem constraints toNegate
+--     objFunc = Max {
+--         objective = DM.singleton 1 1
+--       } 
 
 

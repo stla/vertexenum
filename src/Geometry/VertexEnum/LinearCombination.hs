@@ -7,6 +7,7 @@ module Geometry.VertexEnum.LinearCombination
   , linearCombination
   , constant
   , cst
+  , toRationalLinearCombination
   )
   where
 import           Data.AdditiveGroup ( AdditiveGroup(zeroV, negateV, (^+^)) )
@@ -17,6 +18,9 @@ import           Data.Tuple         ( swap )
 import           Data.VectorSpace   ( linearCombo, VectorSpace(..) )
 
 newtype LinearCombination a = LinearCombination (IntMap a)
+
+toRationalLinearCombination :: Real a => LinearCombination a -> LinearCombination Rational
+toRationalLinearCombination (LinearCombination imap) = LinearCombination (IM.map toRational imap)
 
 instance (Eq a) => Eq (LinearCombination a) where
   (==) :: LinearCombination a -> LinearCombination a -> Bool
