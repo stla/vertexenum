@@ -71,7 +71,7 @@ vertexenum constraints point = do
       ipoint <- interiorPoint constraints 
       hsintersections halfspacesMatrix ipoint False
 
--- | Check whether a point fulfills some inequalities; returns the 
+-- | Checks whether a point fulfills some inequalities; returns the 
 -- difference between the upper member and the lower member for each
 -- inequality, which is positive in case if the inequality is fulfilled.
 checkConstraints :: 

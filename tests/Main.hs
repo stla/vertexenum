@@ -1,4 +1,4 @@
-module Main (main) where
+module Main ( main ) where
 -- import Approx               ( assertApproxZero )
 import Geometry.VertexEnum  ( (.<=), (.>=), Constraint, newVar 
                             , vertexenum, interiorPoint, checkConstraints )    

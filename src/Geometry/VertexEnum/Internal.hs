@@ -76,12 +76,7 @@ inequality toNegate row =
 
 inequalities :: [[Rational]] -> [Bool] -> [PolyConstraint]
 inequalities normConstraints toNegate = 
-  simplifySystem $ 
---    [ LEQ { lhs = DM.fromList [(0, -1), (i, sign (toNegate !! (i-1)))], rhs = 0 } | i <- [1 .. nvars] ]
-    map (inequality toNegate) normConstraints
-  -- where 
-  --   nvars = length toNegate
-  --   sign test = if test then 1 else -1 
+  simplifySystem $ map (inequality toNegate) normConstraints
 
 -- iPoint does not necessarily return the optimal interior point, because 
 -- this point possibly corresponds to another [Bool] combination; it just 
@@ -140,33 +135,3 @@ findSigns halfspacesMatrix = do
               return $ combo
             else do
               go (i+1)
-
-
--- makeFeasibleSystem :: [Constraint Rational] -> [Bool] -> FeasibleSystem
--- makeFeasibleSystem constraints toNegate = FeasibleSystem dico slackvars [] ovar
---   where
---     halfspacesMatrix = normalizeConstraints constraints
---     nconstraints = length halfspacesMatrix
---     nvars = length (halfspacesMatrix !! 0) 
---     d (i, row) = (i, dictvalue)
---       where 
---         row' = map negate (1 : row)
---         coeffs0 = init row'
---         coeffs = [if toNegate !! i then -coeffs0 !! i else coeffs0 !! i | i <- [0 .. length coeffs0 - 1]]
---         bound = last row'
---         dictvalue = DictValue {varMapSum = DM.fromList (zip [1..] coeffs), constant = bound}
---     dico = DM.fromList (map d (zip [nvars+1 ..] halfspacesMatrix))
---     slackvars = [nconstraints + nvars, nconstraints+nvars-1 .. nvars+1]
---     ovar = nconstraints + nvars + 1
-
--- optimize :: [Constraint Rational] -> [Bool] -> IO (Maybe Result)
--- optimize constraints toNegate = do
---   runStdoutLoggingT $ filterLogger (\_ _ -> False) $ 
---                   optimizeFeasibleSystem objFunc fs
---   where
---     fs = makeFeasibleSystem constraints toNegate
---     objFunc = Max {
---         objective = DM.singleton 1 1
---       } 
-
-
