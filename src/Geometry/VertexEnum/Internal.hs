@@ -62,13 +62,15 @@ normalizeConstraints constraints =
   where
     vars = nub $ concatMap varsOfConstraint constraints
 
+negateIf :: Bool -> Rational -> Rational
+negateIf test x = if test then -x else x
+
 inequality :: [Bool] -> [Rational] -> PolyConstraint
 inequality toNegate row = 
   LEQ { 
         lhs = DM.fromList (zip [0 ..] (1 : coeffs')), rhs = -bound
       }
   where
-    negateIf test x = if test then -x else x
     (coeffs, bound) = fromJust $ unsnoc row
     coeffs' = zipWith negateIf toNegate coeffs
 
@@ -100,7 +102,6 @@ iPoint halfspacesMatrix toNegate = do
         )
     Nothing -> error "iPoint: should not happen."
   where
-    negateIf test x = if test then -x else x
     polyConstraints = inequalities halfspacesMatrix toNegate
     objFunc = Max {
         objective = DM.singleton 0 1
@@ -119,7 +120,6 @@ feasiblePoint halfspacesMatrix toNegate = do
           } 
       where
         (coeffs, bound) = fromJust $ unsnoc row
-        negateIf test x = if test then -x else x
         coeffs' = zipWith negateIf toNegate coeffs
 
 findSigns :: [[Rational]] -> IO [Bool]
@@ -130,8 +130,9 @@ findSigns halfspacesMatrix = do
     combinations = sequence $ replicate nvars [False, True]
     ncombinations = length combinations
     go i 
-      | i == ncombinations = error "there is no feasible point;"
-      | otherwise = do 
+      | i == ncombinations = do 
+          return []
+      | otherwise          = do 
           let combo = combinations !! i
           test <- feasiblePoint halfspacesMatrix combo
           if test 

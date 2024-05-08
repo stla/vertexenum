@@ -42,7 +42,7 @@ hsintersections halfspaces ipoint stdout = do
     then do
       free resultPtr
       free nintersectionsPtr
-      error $ "qhull returned an error (code " ++ show exitcode ++ ")"
+      error $ "qhull returned an error (code " ++ show exitcode ++ ")."
     else do
       nintersections <- (<$!>) fromIntegral (peek nintersectionsPtr)
       result <- (<$!>) (map (map realToFrac))
@@ -53,9 +53,11 @@ hsintersections halfspaces ipoint stdout = do
       return result
 
 -- | Vertex enumeration
-vertexenum :: Real a => [Constraint a]   -- ^ list of inequalities
-           -> Maybe [Double] -- ^ point in the interior of the polytope; @Nothing@ for automatic point
-           -> IO [[Double]]
+vertexenum :: 
+    Real a 
+  => [Constraint a] -- ^ linear inequalities
+  -> Maybe [Double] -- ^ point satisfying the inequalities, @Nothing@ for automatic point
+  -> IO [[Double]]  -- ^ vertices of the polytope defined by the inequalities
 vertexenum constraints point = do
   let halfspacesMatrix = 
         map (map realToFrac) (normalizeConstraints constraints)
@@ -63,18 +65,20 @@ vertexenum constraints point = do
     then do
       let check = checkConstraints constraints (fromJust point)
       when (not $ all snd check) $
-        error "vertexenum: the provided point does not fulfill the constraints"
+        error "vertexenum: the provided point does not fulfill the inequalities."
       hsintersections halfspacesMatrix (fromJust point) False
     else do
       ipoint <- interiorPoint constraints 
       hsintersections halfspacesMatrix ipoint False
 
--- | Check whether a point fulfills some constraints; returns the 
+-- | Check whether a point fulfills some inequalities; returns the 
 -- difference between the upper member and the lower member for each
--- constraint, which is positive in case if the constraint is fulfilled
-checkConstraints :: Real a => [Constraint a]     -- ^ list of inequalities
-                 -> [Double]         -- ^ point to be tested
-                 -> [(Double, Bool)] -- ^ difference and status for each constraint
+-- inequality, which is positive in case if the inequality is fulfilled.
+checkConstraints :: 
+  Real a 
+  => [Constraint a]   -- ^ linear inequalities
+  -> [Double]         -- ^ point to be tested
+  -> [(Double, Bool)] -- ^ difference and status for each constraint
 checkConstraints constraints point = 
   if nvars == length point + 1
     then 
@@ -88,11 +92,16 @@ checkConstraints constraints point =
     checkRow pt row = - sum (zipWith (*) row (pt ++ [1]))
     differences = map (checkRow point) halfspacesMatrix
 
--- | Returns a point fulfilling a list of constraints
-interiorPoint :: Real a => [Constraint a] -> IO [Double]
+-- | Returns a point fulfilling a list of inequalities
+interiorPoint :: 
+  Real a 
+  => [Constraint a] -- ^ linear inequalities
+  -> IO [Double]    -- ^ point fulfilling the inequaities
 interiorPoint constraints = do 
   let
     constraints' = map toRationalConstraint constraints
     halfspacesMatrix = normalizeConstraints constraints'
   signs <- findSigns halfspacesMatrix 
+  when (null signs) $
+    error "interiorPoint: no feasible point."
   iPoint halfspacesMatrix signs
