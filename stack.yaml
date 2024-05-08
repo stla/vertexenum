@@ -42,6 +42,8 @@ packages:
 extra-deps:
   - simplex-method-0.2.0.0@sha256:ccfc12e88789d4e11935061d743b757ff7f6424c2f8f39ec8194cfe7a9af7bce,2398
 
+allow-newer: true
+
 # Override default flag values for local packages and extra-deps
 # flags:
 # hmatrix:
