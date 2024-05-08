@@ -1,7 +1,8 @@
 # vertexenum
 
 <!-- badges: start -->
-[![Stack](https://github.com/stla/vertexenum/actions/workflows/Stack.yml/badge.svg)](https://github.com/stla/vertexenum/actions/workflows/Stack.yml)
+[![Stack-lts](https://github.com/stla/vertexenum/actions/workflows/Stack-lts.yml/badge.svg)](https://github.com/stla/vertexenum/actions/workflows/Stack-lts.yml)
+[![Stack-nightly](https://github.com/stla/vertexenum/actions/workflows/Stack-nightly.yml/badge.svg)](https://github.com/stla/vertexenum/actions/workflows/Stack-nightly.yml)
 <!-- badges: end -->
 
 ***Get the vertices of an intersection of halfspaces.***

@@ -13,12 +13,9 @@ jobs:
           - ubuntu-latest
 
         resolver:
-          - nightly
           - lts       # ghc-9.6 (as of writing)
           - lts-21.25 # ghc 9.4
           - lts-20.26 # ghc-9.2
-          - lts-19.33 # ghc-9.0
-          - lts-18.9  # ghc-8.10
 
       fail-fast: false
 
