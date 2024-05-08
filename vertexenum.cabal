@@ -83,6 +83,15 @@ test-suite unit-tests
                       , tasty-hunit >= 0.10 && < 0.11
                       , vertexenum
   Default-Language:     Haskell2010
+  ghc-options:         -Wall
+                       -Wcompat
+                       -Widentities
+                       -Wincomplete-record-updates
+                       -Wincomplete-uni-patterns
+                       -Wmissing-export-lists
+                       -Wmissing-home-modules
+                       -Wpartial-fields
+                       -Wredundant-constraints
 
 source-repository head
   type:     git

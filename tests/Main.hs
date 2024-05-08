@@ -1,5 +1,5 @@
-module Main where
-import Approx               ( assertApproxZero )
+module Main (main) where
+-- import Approx               ( assertApproxZero )
 import Geometry.VertexEnum  ( (.<=), (.>=), Constraint, newVar 
                             , vertexenum, interiorPoint, checkConstraints )    
 import Test.Tasty           ( defaultMain, testGroup )
